@@ -46,7 +46,7 @@ class SetupHandler(webapp.RequestHandler):
                 user, 'The Beginning',
                 'You\'re in an ever-changing room. It\'s not really a room, '
                 'because it has no walls or ceiling. In fact, it doesn\'t even '
-                'exist! You feel that the mere thought of something would '
+                'exist! You sense that the mere thought of something would '
                 'bring everything around you into existence. What will you do?')
 
             fid = frame.key().id()
@@ -60,7 +60,7 @@ class SetupHandler(webapp.RequestHandler):
         if multifarce.model.Command.all().count() == 0:
             command = multifarce.model.Command.create(
                 user, frame, ['go west', 'walk west', 'travel west'],
-                'You go west. (Sorry, no frame to go to yet...)')
+                'You go west!')
             w('- Created new command.\r\n')
         else:
             w('- Commands already exist.\r\n')

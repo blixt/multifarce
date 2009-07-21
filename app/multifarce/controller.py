@@ -30,7 +30,7 @@ class MultifarceController(object):
         """
         command = model.Command.find(frame, command)
         if not command:
-            raise multifarce.ExecuteError('Could not find the specified command.',
+            raise multifarce.ExecuteError('You can\'t do that.',
                                           'COMMAND_NOT_FOUND')
 
         if not isinstance(flags, list):
@@ -39,7 +39,7 @@ class MultifarceController(object):
         for flag in command.flags_required:
             if flag not in flags:
                 raise multifarce.ExecuteError(
-                    'Cannot do that yet; missing %s.' % flag,
+                    'You can\'t do that yet; missing %s.' % flag,
                     'FLAG_REQUIRED')
 
         for flag in command.flags_on:
@@ -61,7 +61,7 @@ class MultifarceController(object):
     def get_command(self, command):
         command = blixt.appengine.db.get_instance(command, model.Command)
 
-        result = {'id': frame.key().id(), 'author': command.user_key,
+        result = {'id': frame.key().id(), 'author': command.user_name,
                   'frame_id': command.frame_id, 'synonyms': command.synonyms,
                   'text': command.text,
                   'go_to_frame_id': command.go_to_frame_id,
@@ -72,51 +72,11 @@ class MultifarceController(object):
     def get_frame(self, frame):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
-        result = {'id': frame.key().id(), 'author': frame.user_key,
+        result = {'id': frame.key().id(), 'author': frame.user_name,
                   'title': frame.title, 'text': frame.text}
         return result
 
-    def get_user_info(self, user, key=True):
-        """Returns information about the specified user. Fails if the user does
-        not exist.
-        """
-        if key: user = db.Key(user)
-        user = blixt.appengine.db.get_instance(user, model.User)
-        if not user:
-            raise multifarce.NotFoundError('The specified user could not be '
-                                           'found.', 'USER_NOT_FOUND')
-        result = {'display_name': user.display_name,
-                  'avatar': user.avatar} # TODO: avatar will be URL to gravatar
-        return result
-
-    def log_in(self, username, password):
-        """Attempts to log in using the specified credentials. Will fail if the
-        username does not exist, the password is wrong or if the user is linked
-        to a Google account.
-        """
-        model.User.log_in(username, password, self)
-        return self.status()
-
-    def log_out(self):
-        """Logs out the current user. Has no effect if the user is not logged
-        in, or if the user is logged in with a Google account.
-        """
-        user = model.User.get_current(self)
-        if user:
-            user.end_session(self)
-
-    def register(self, username, display_name, password=None, email=None):
-        """Registers a user to Multifarce. If password and e-mail is omitted,
-        the user will be linked to the currently logged in Google account (or
-        fails if the user is not logged in with a Google account.)
-
-        Normal user accounts will need to be activated using a code sent to
-        their e-mail before they can log in. If linking to a Google account,
-        no activation is required.
-        """
-        model.User.register(username, display_name, password, email, self)
-
-    def status(self, path='/'):
+    def get_status(self, path='/'):
         """Returns the status for the current user, such as username and
         display name if the user is logged in. If the user is linked to a
         Google account, the Google logout URL will also be provided.
@@ -146,3 +106,43 @@ class MultifarceController(object):
             result['logged_in'] = False
 
         return result
+
+    def get_user_info(self, user):
+        """Returns information about the specified user. Fails if the user does
+        not exist.
+        """
+        user = blixt.appengine.db.get_instance(user, model.User)
+        if not user:
+            raise multifarce.NotFoundError('The specified user could not be '
+                                           'found.', 'USER_NOT_FOUND')
+        result = {'username': user.key().name(),
+                  'display_name': user.display_name,
+                  'avatar': user.avatar} # TODO: avatar will be URL to gravatar
+        return result
+
+    def log_in(self, username, password):
+        """Attempts to log in using the specified credentials. Will fail if the
+        username does not exist, the password is wrong or if the user is linked
+        to a Google account.
+        """
+        model.User.log_in(username, password, self)
+        return self.get_status()
+
+    def log_out(self):
+        """Logs out the current user. Has no effect if the user is not logged
+        in, or if the user is logged in with a Google account.
+        """
+        user = model.User.get_current(self)
+        if user:
+            user.end_session(self)
+
+    def register(self, username, display_name, password=None, email=None):
+        """Registers a user to Multifarce. If password and e-mail is omitted,
+        the user will be linked to the currently logged in Google account (or
+        fails if the user is not logged in with a Google account.)
+
+        Normal user accounts will need to be activated using a code sent to
+        their e-mail before they can log in. If linking to a Google account,
+        no activation is required.
+        """
+        model.User.register(username, display_name, password, email)

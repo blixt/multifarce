@@ -140,10 +140,11 @@ body, button, input, textarea {
 }
 
 div.info a.close {
+    background: #fee;
     border-radius: 6px;
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
-    color: #777;
+    color: #800;
     margin-left: .2em;
     padding: 0 .3em;
     text-decoration: none;

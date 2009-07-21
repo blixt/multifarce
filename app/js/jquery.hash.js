@@ -1,5 +1,6 @@
 /*!
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
+ * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
  * 
  * jQuery hash plugin (Depends on jQuery, Hash)
@@ -38,7 +39,7 @@
 var
 // Plugin settings
 iframeId = 'jquery-history',
-iframeSrc = '/s/js/blank.html',
+iframeSrc = '/js/blank.html',
 eventName = 'hashchange',
 eventDataName = 'hash.fn',
 init,

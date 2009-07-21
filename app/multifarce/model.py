@@ -12,10 +12,12 @@ import blixt.appengine.db
 
 import multifarce
 
+# TODO: This value will most likely be reputation controlled.
+MAX_COMMANDS_PER_FRAME_PER_USER = 5
 MAX_IMAGE_SIZE = 650
 
 class Command(db.Model):
-    user_key = db.StringProperty(required=True)
+    user_name = db.StringProperty(required=True)
     frame_id = db.IntegerProperty(required=True)
     synonyms = db.StringListProperty(required=True)
     text = db.StringProperty(required=True)
@@ -37,17 +39,11 @@ class Command(db.Model):
                flags_on=[], flags_off=[], flags_required=[]):
         """Creates a new command.
         """
-        if isinstance(user, User):
-            user = str(user.key())
-        elif isinstance(user, basestring):
-            if not blixt.appengine.db.entity_exists(user, User):
-                raise multifarce.CreateCommandError(
-                    'User does not exist.',
-                    'USER_NOT_FOUND')
-        else:
+        user = blixt.appengine.db.get_id_or_name(user, User)
+        if not user:
             raise multifarce.CreateCommandError(
-                'Invalid type (user); expected User or string.',
-                'TYPE_ERROR')
+                'User does not exist.',
+                'USER_NOT_FOUND')
 
         if not isinstance(commands, list):
             raise multifarce.CreateCommandError(
@@ -60,25 +56,20 @@ class Command(db.Model):
                 'TYPE_ERROR')
 
         # Validate frame.
-        if isinstance(frame, Frame):
-            frame = frame.key().id()
-        elif isinstance(frame, int):
-            if not blixt.appengine.db.entity_exists(frame, Frame):
-                raise multifarce.CreateCommandError(
-                    'Frame does not exist.',
-                    'FRAME_NOT_FOUND')
-        else:
+        frame = blixt.appengine.db.get_id_or_name(frame, Frame)
+        if not frame:
             raise multifarce.CreateCommandError(
-                'Invalid type (frame); expected Frame or int.',
-                'TYPE_ERROR')
+                'Frame does not exist.',
+                'FRAME_NOT_FOUND')
 
         # Limit number of commands that can be created on a single frame by one
         # user.
-        count = Command.gql('WHERE user_key = :user AND frame_id = :frame',
+        count = Command.gql('WHERE user_name = :user AND frame_id = :frame',
                             user=user, frame=frame).count()
-        if count >= 5:
+        if count >= MAX_COMMANDS_PER_FRAME_PER_USER:
             raise multifarce.CreateCommandError(
-                'A user can only add a maximum of 5 commands to one frame.',
+                'A user can only add a maximum of %d commands to one '
+                'frame.' % MAX_COMMANDS_PER_FRAME_PER_USER,
                 'MAX_COMMANDS_FRAME')
 
         # Validate synonyms.
@@ -126,7 +117,7 @@ class Command(db.Model):
         # TODO: Validate flags variables.
 
         # Create and store command.
-        cmd = Command(user_key=user, frame_id=frame, synonyms=synonyms,
+        cmd = Command(user_name=user, frame_id=frame, synonyms=synonyms,
                       text=text, go_to_frame_id=go_to_frame,
                       flags_on=flags_on, flags_off=flags_off,
                       flags_required=flags_required)
@@ -145,7 +136,7 @@ class Command(db.Model):
                            frame=frame, synonyms=command).get()
 
 class Frame(db.Model):
-    user_key = db.StringProperty(required=True)
+    user_name = db.StringProperty(required=True)
     image_id = db.IntegerProperty()
     title = db.StringProperty(required=True)
     text = db.StringProperty(required=True)
@@ -181,7 +172,7 @@ class Frame(db.Model):
                     'Invalid type (go_to_frame); expected Frame or int.',
                     'TYPE_ERROR')
 
-        frame = Frame(user_key=str(user.key()), image_id=image,
+        frame = Frame(user_name=user.key().name(), image_id=image,
                       title=title, text=text)
         frame.put()
 
@@ -294,8 +285,7 @@ class User(db.Model):
         return user
 
     @staticmethod
-    def register(username, display_name, password=None,
-                 email=None, handler=None):
+    def register(username, display_name, password=None, email=None):
         """Creates a new user that is registered to the application. If the user
         is logged in with a Google account and e-mail and password is not
         supplied, the new user will be linked to the Google account.

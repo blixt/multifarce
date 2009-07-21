@@ -28,6 +28,10 @@ def entity_exists(value, model):
     return q.get()
 
 def get_id_or_name(value, model):
+    """Returns the id or name of a model instance from value. If a number or a
+    string is supplied, a check will be made to make sure it exists in the
+    data store.
+    """
     if not issubclass(model, db.Model):
         raise TypeError('Invalid type (model); expected subclass of Model.')
 
@@ -37,7 +41,7 @@ def get_id_or_name(value, model):
         return value.key().id_or_name()
     else:
         raise TypeError('Invalid type (value); expected number, string or '
-                        'Model.')
+                        '%s.' % model.__name__)
 
 def get_instance(value, model):
     """Returns a model instance from value. If value is a string, gets by key

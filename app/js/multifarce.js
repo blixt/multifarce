@@ -21,6 +21,25 @@
 // Multifarce namespace.
 var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
     var
+    // The title of the application.
+    appTitle = 'multifarce',
+    
+    // Helper class for showing one element from a set of elements at a time.
+    // All arguments are assumed to be jQuery selections of a single element.
+    Switcher = function () {
+        // Show the first element, hide the rest.
+        var shown = arguments[0], i;
+        for (i = 1; i < arguments.length; i++) {
+            arguments[i].remove();
+        }
+
+        this.show = function (which) {
+            if (shown == which) return;
+            shown.replaceWith(which);
+            shown = which;
+        };
+    },
+
     // multifarce-specific ServiceClient.
     Client = (function () {
         // Constructor.
@@ -31,32 +50,38 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
 
         // Shared public members.
         cls.prototype = {
-            createCommand: function (frameId, commands, text, newFrameTitle,
-                                     newFrameText, flagsOn, flagsOff,
-                                     flagsRequired)
+            createCommand: function (frameId, commands, text, goToFrameId,
+                                     flagsOn, flagsOff, flagsRequired)
             {
                 this.simpleCall('create_command', {
-                    frame_id: frameId,
+                    frame: frameId,
                     commands: commands,
                     text: text,
-                    new_frame_title: newFrameTitle,
-                    new_frame_text: newFrameText,
+                    go_to_frame: goToFrameId,
                     flags_on: flagsOn,
                     flags_off: flagsOff,
                     flags_required: flagsRequired
                 });
             },
 
-            execute: function (command) {
-                this.simpleCall('execute', {command: command});
+            execute: function (frame, command, flags) {
+                this.simpleCall('execute', {
+                    frame: frame,
+                    command: command,
+                    flags: flags
+                });
+            },
+
+            getCommand: function (commandId) {
+                this.simpleCall('get_command', {command: commandId});
             },
 
             getFrame: function (frameId) {
-                this.simpleCall('get_frame', {frame_id: frameId});
+                this.simpleCall('get_frame', {frame: frameId});
             },
 
-            getStatus: function () {
-                this.simpleCall('status', {});
+            getStatus: function (path) {
+                this.simpleCall('get_status', {path: path || '/'});
             },
             
             getUserInfo: function (username) {
@@ -114,59 +139,211 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
         return cls;
     })(),
 
+    api = new Client(),
+    
     User = (function () {
+        // Private static members.
+        var
+        cache = {},
+
         // Constructor.
-        var cls = function (service, username) {
+        cls = function (username) {
             EventSource.call(this, 'load');
             
             // Private members.
             var
             loaded = false,
             displayName,
+            error = function () {
+                this.clearHandlers();
+                delete cache[username];
+            },
             success = function (user) {
                 displayName = user.display_name;
+                loaded = true;
                 this.raise('load');
             };
             
             // Getters/setters.
             this.get_displayName = function () { return displayName; };
             this.get_username = function () { return username; };
+            this.isLoaded = function () { return loaded; };
             
             // Public members.
             this.reload = function () {
-                service.success(success, this).getUserInfo(username);
+                api.success(success, this).error(error, this);
+                api.getUserInfo(username);
             };
             
             this.reload();
         };
 
+        // Public static members.
+        cls.get = function (username) {
+            if (typeof username != 'string')
+                throw 'Invalid type (username); expected string.';
+
+            if (username in cache) {
+                return cache[username];
+            } else {
+                cache[username] = new cls(username);
+            }
+        };
+
         return cls;
     })(),
     
-    // Handler for default page.
-    HomeHandler = Application.handler(function () {
-        alert('Home, sweet home!');
-    }),
-    
-    // Handler for user info page.
-    UserHandler = Application.handler(function (username) {
-        alert('User: ' + username);
-    }),
-    
-    // Create application for handling the site.
-    site = new Application([
-        ['^$', HomeHandler],
-        ['^user/([^/]+)$', UserHandler]
-    ]);
+    Game = (function () {
+        var cls = function (api) {
+            // Register events.
+            EventSource.call(this,
+                'execute-success', 'execute-error', 'frame-load');
+        
+            var frameId, flags,
+            // Handle failed execute calls.
+            execError = function (error) {
+                this.raise('execute-error', error);
+            },
+            // Handle successful execute calls.
+            execSuccess = function (result) {
+                if (result.frame_id != frameId) {
+                    frameId = result.frame_id;
+                    api.success(frameSuccess, this).getFrame(frameId);
+                }
+                flags = result.flags;
+                this.raise('execute-success', result);
+            },
+            // Handle successful getFrame calls.
+            frameSuccess = function (frame) {
+                this.raise('frame-load', frame);
+            };
 
-    // Set up application to use hash as the path.
-    $(document).hashchange(function (e, newHash) {
-        site.exec(newHash);
-    });
-    $.hash.init();
+            // Execute the specified command for the current state.
+            this.execute = function (command) {
+                if (!command) return;
+                api.error(execError, this).success(execSuccess, this);
+                api.execute(frameId, command, flags);
+            };
 
+            // Initialize game.
+            this.start = function (initFrameId, initFlags) {
+                frameId = initFrameId || 1;
+                flags = initFlags || [];
+                
+                api.success(frameSuccess, this).getFrame(frameId);
+            };
+        };
+        
+        return cls;
+    })(),
+    
+    // Game handler object.
+    game = new Game(api);
+    
     return {
-        client: Client,
+        init: function () {
+            var
+            // Page elements.
+            homePage = $('#home'),
+            registerPage = $('#register'),
+            notFoundPage = $('#not-found'),
+            notFoundPath = $('#not-found-path'),
+            frameTitle = homePage.find('#current-frame h3'),
+            frameText = homePage.find('#current-frame p.text'),
+            frameAction = homePage.find('#action'),
+            frameGo = homePage.find('#action-go'),
+            frameLog = homePage.find('#log'),
+
+            // Switcher for the pages.
+            pages = new Switcher(homePage, registerPage, notFoundPage),
+            
+            // Helper function for executing a command.
+            execute = function () {
+                var command = frameAction.val();
+                if (!command) return;
+                game.execute(command);
+                frameAction.val('');
+
+                frameLog.prepend(
+                    $('<p class="command"/>').text('> ' + command));
+            },
+
+            // Handler for viewing a command.
+            CommandHandler = Application.handler(function (id) {
+            }),
+
+            // Handler for default page.
+            HomeHandler = Application.handler(function () {
+                frameAction.keydown(function (event) {
+                    if (event.keyCode == 13) execute();
+                });
+                
+                frameGo.click(execute);
+
+                document.title = appTitle;
+                pages.show(homePage);
+            }),
+            
+            // Handler for creating a new command.
+            NewCommandHandler = Application.handler(function () {
+            }),
+            
+            // Handler for showing an error when something can't be found.
+            NotFoundHandler = Application.handler(function () {
+                document.title = 'Path not found! - ' + appTitle;
+                notFoundPath.text(this.get_path());
+                pages.show(notFoundPage);
+            }),
+
+            // Handler for letting a user register.
+            RegisterHandler = Application.handler(function () {
+            }),
+            
+            // Handler for user info page.
+            UserHandler = Application.handler(function (username) {
+            }),
+            
+            // Create application for handling the site.
+            site = new Application([
+                ['^$', HomeHandler],
+                ['^commands/(\d+)$', CommandHandler],
+                ['^commands/new$', NewCommandHandler],
+                ['^user/([^/]+)$', UserHandler],
+                ['^.*$', NotFoundHandler]
+            ]);
+
+            // Set up application to use hash as the path.
+            $(document).hashchange(function (e, newHash) {
+                site.exec(newHash);
+            });
+            $.hash.init();
+            
+            // Set up game.
+            game.listen('frame-load', function (frame) {
+                frameTitle.text(frame.title);
+                frameText.text(frame.text);
+                $('<p class="frame"/>')
+                    .append('Entering ')
+                    .append($('<strong/>').text(frame.title))
+                    .append(':<br/>')
+                    .append($('<em/>').text(frame.text))
+                    .prependTo(frameLog);
+            });
+            
+            game.listen('execute-error', function (error) {
+                frameLog.prepend($('<p class="result"/>').text(error.message));
+            });
+
+            game.listen('execute-success', function (result) {
+                frameLog.prepend($('<p class="result"/>').text(result.text));
+            });
+            
+            game.start();
+        },
+        api: api,
+        game: game,
         user: User
     };
 })(Application, EventSource, Hash, jQuery, ServiceClient);
+
+jQuery(Multifarce.init);

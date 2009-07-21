@@ -13,16 +13,12 @@ class JsonService(webapp.RequestHandler):
     """Opens up all attributes that don't start with an underscore to HTTP
     requests using JSON to represent data.
 
-    Note #1: Inheritance is currently not supported. To make attributes of the
-    base class available, redefine them in the child class.
-
-    Note #2: Arguments that start with an underscore are also ignored. For the
-    call to succeed, these arguments must have a default value.
+    Note: Arguments that start with an underscore are also ignored. For the call
+          to succeed, these arguments must have a default value.
     """
-    @classmethod
-    def _is_public_attr(cls, action):
+    def _is_public_attr(self, action):
         return (not action.startswith('_') and
-                action in cls.__dict__)
+                hasattr(self, action))
                
     def get(self, action):
         out = {'status': 'unknown',

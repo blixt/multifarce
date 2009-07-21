@@ -1,5 +1,6 @@
 /*!
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
+ * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
  * 
  * Event source "class"
@@ -25,7 +26,7 @@
 var EventSource = function () {
     // Private members.
     var events = {}, args = arguments, i, l, name,
-    slice = Array.prototype.slice.call;
+    slice = Array.prototype.slice;
 
     for (i = 0, l = args.length; i < l; i++) {
         name = args[i];
@@ -63,7 +64,7 @@ var EventSource = function () {
     
     this.raise = function (event) {
         // No validation for the sake of performance.
-        var e = events[event], i, l, args = slice(arguments, 1);
+        var e = events[event], i, l, args = slice.call(arguments, 1);
         for (i = 0, l = e.length; i < l; i++)
             e[i][0].apply(e[i][1], args);
     };
