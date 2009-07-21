@@ -1,0 +1,25 @@
+application: multifarce
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /favicon.ico
+  mime_type: image/gif
+  static_files: media/favicon.gif
+  upload: media/favicon\.gif
+
+- url: /js
+  static_dir: js
+
+- url: /media
+  static_dir: media
+
+- url: /_wave/.*
+  script: wave.py
+
+- url: /admin/.*
+  script: admin.py
+
+- url: /.*
+  script: app.py
