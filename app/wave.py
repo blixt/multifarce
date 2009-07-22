@@ -57,7 +57,7 @@ class MultifarceBot(object):
         """
         document.AppendText('Entering ')
         rng = blixt.wave.append_text(document, frame['title'])
-        document.AppendText(':\n' + frame['text'])
+        document.AppendText('\n' + frame['text'])
 
         document.SetAnnotation(rng, 'style/fontWeight', 'bold')
 

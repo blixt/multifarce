@@ -32,6 +32,14 @@ class FindCommandError(Error):
     """Raised when invalid arguments are supplied for finding a command."""
     pass
 
+class GetCommandError(Error):
+    """Raised when getting a command failed."""
+    pass
+
+class GetFrameError(Error):
+    """Raised when getting a frame failed."""
+    pass
+
 class InternalError(Error):
     """Raised when something that shouldn't happen happens."""
     pass

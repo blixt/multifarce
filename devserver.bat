@@ -1,6 +1,6 @@
 @echo off
 prepare.py
-dev_appserver.py --debug ./app/
+dev_appserver.py ./app/
 
 echo.
 pause

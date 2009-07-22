@@ -25,6 +25,19 @@ class MultifarceController(object):
 
         return self.get_command(cmd)
 
+    def create_frame(self, title, text):
+        """Creates a new frame.
+        """
+        user = model.User.get_current(self)
+        if not user:
+            raise multifarce.NotLoggedInError('You must be logged in to create '
+                                              'frames.', 'MUST_BE_LOGGED_IN')
+
+        # Create frame.
+        frame = model.Frame.create(user, title, text)
+
+        return self.get_frame(frame)
+
     def execute(self, frame, command, flags=None):
         """Executes a command for the specified frame.
         """
@@ -38,9 +51,8 @@ class MultifarceController(object):
 
         for flag in command.flags_required:
             if flag not in flags:
-                raise multifarce.ExecuteError(
-                    'You can\'t do that yet; missing %s.' % flag,
-                    'FLAG_REQUIRED')
+                raise multifarce.ExecuteError('You can\'t do that yet.' % flag,
+                                              'FLAG_REQUIRED')
 
         for flag in command.flags_on:
             if flag not in flags:
@@ -61,7 +73,11 @@ class MultifarceController(object):
     def get_command(self, command):
         command = blixt.appengine.db.get_instance(command, model.Command)
 
-        result = {'id': frame.key().id(), 'author': command.user_name,
+        if not command:
+            raise multifarce.GetCommandError('The specified command could not '
+                                             'be found.', 'COMMAND_NOT_FOUND')
+
+        result = {'id': command.key().id(), 'author': command.user_name,
                   'frame_id': command.frame_id, 'synonyms': command.synonyms,
                   'text': command.text,
                   'go_to_frame_id': command.go_to_frame_id,
@@ -72,8 +88,21 @@ class MultifarceController(object):
     def get_frame(self, frame):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
+        if not frame:
+            raise multifarce.GetFrameError('The specified frame could not be '
+                                           'found.', 'FRAME_NOT_FOUND')
+
         result = {'id': frame.key().id(), 'author': frame.user_name,
                   'title': frame.title, 'text': frame.text}
+        return result
+
+    def get_frames(self):
+        frames = model.Frame.all().fetch(1000)
+
+        result = []
+        for frame in frames:
+            result.append(self.get_frame(frame))
+
         return result
 
     def get_status(self, path='/'):

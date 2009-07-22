@@ -139,7 +139,7 @@ class Frame(db.Model):
     user_name = db.StringProperty(required=True)
     image_id = db.IntegerProperty()
     title = db.StringProperty(required=True)
-    text = db.StringProperty(required=True)
+    text = db.StringProperty(required=True, multiline=True)
 
     @staticmethod
     def create(user, title, text, image=None):
