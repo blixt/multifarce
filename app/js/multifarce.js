@@ -17,6 +17,49 @@
  * Dependencies: Application, EventSource, Hash, jQuery, jQuery hash plugin,
  *               ServiceClient
  */
+/*
+ * jQuery Easing v1.3 - http://gsgd.co.uk/sandbox/jquery/easing/
+ *
+ * Uses the built in easing capabilities added In jQuery 1.1
+ * to offer multiple easing options
+ *
+ * TERMS OF USE - jQuery Easing
+ * 
+ * Open source under the BSD License. 
+ * 
+ * Copyright © 2008 George McGinley Smith
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * 
+ * Neither the name of the author nor the names of contributors may be used to
+ * endorse or promote products derived from this software without specific prior
+ * written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE. 
+ */
+
+// Add easeInQuart easing (see copyright notice above.)
+jQuery.easing.easeInQuart = function (x, t, b, c, d) {
+    return c * (t /= d) * t * t * t + b;
+};
 
 // Extend jQuery with a simple function for inserting formatted text.
 jQuery.fn.formattedText = function (text) {
@@ -350,6 +393,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
         init: function () {
             var
             // Page elements.
+            allPages = $('div.page'),
+            
             notifications = $('#notifications'),
             pageName = $('#page-name'),
             username = $('#username'),
@@ -362,6 +407,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             frameAction = homePage.find('#action'),
             frameGo = homePage.find('#action-go'),
             frameLog = homePage.find('#log'),
+
+            logInPage = $('#log-in'),
 
             newCommandPage = $('#new-command'),
             newCommandFrame = $('#new-command-frame'),
@@ -385,8 +432,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             registerPage = $('#register'),
 
             // Switcher for the pages.
-            pages = new Switcher(homePage, newCommandPage, newFramePage,
-                                 notFoundPage, registerPage),
+            pages = new Switcher(homePage, logInPage, newCommandPage,
+                                 newFramePage, notFoundPage, registerPage),
 
             // Get current user.
             currentUser = User.current(),
@@ -416,6 +463,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 } else {
                     game.execute(command);
                 }
+                
+                frameAction.focus();
             },
             
             // Helper function for showing a notification.
@@ -424,12 +473,20 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 notifications.append(
                     $('<p/>')
                         .addClass(type || 'message')
-                        .append($('<a href="#"/>').text(text))
+                        .append(
+                            $('<a href="#"/>')
+                                .click(
+                                    function () {
+                                        $(this).closest('p').remove();
+                                        return false;
+                                    })
+                                .text(text))
                         .hide()
                         .fadeIn(500)
-                        .fadeOut(15000, function () {
-                            $(this).remove();
-                        }));
+                        .animate({opacity: 0}, 15000, 'easeInQuart',
+                            function () {
+                                $(this).remove();
+                            }));
            },
 
             // Handler for viewing a command.
@@ -460,6 +517,11 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 }
             }),
             
+            // Handler for letting a user log in.
+            LogInHandler = Application.handler(function () {
+                setPage('Log in', logInPage);
+            }),
+
             // Handler for creating a new command.
             NewCommandHandler = Application.handler(function () {
                 newCommandFrame.find('option').remove();
@@ -524,6 +586,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 ['^commands/(\d+)$', CommandHandler],
                 ['^commands/new$', NewCommandHandler],
                 ['^frames/new$', NewFrameHandler],
+                ['^log-in$', LogInHandler],
                 ['^register$', RegisterHandler],
                 ['^user/([^/]+)$', UserHandler],
                 ['^.*$', NotFoundHandler]
@@ -542,6 +605,16 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                     avatar.attr('src',
                         'http://www.gravatar.com/avatar/' +
                         this.get_emailHash() + '?s=28&d=identicon&r=PG');
+                }
+                
+                // Handle Google Accounts notices.
+                if (this.googleLoggedIn()) {
+                    // TODO: Change this code so that the Google notices appear
+                    //       if the user logs out of Google Accounts.
+                    allPages.find('div.google-accounts').remove();
+                } else {
+                    allPages.find('a.google-accounts')
+                        .attr('href', this.get_googleLogUrl());
                 }
             });
             

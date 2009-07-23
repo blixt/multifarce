@@ -1,21 +1,15 @@
-#action,
-#action-go
-{
+#action, #action-go {
     font-size: 19px;
 }
 
 #action {
-    border: #888 solid 1px;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    -webkit-border-radius: 3px;
     margin-right: 5px;
-    padding: 5px;
-    width: 520px;
+    width: 510px;
 }
 
 #action-go {
-    padding: 2px 0;
+    float: none;
+    margin: 0;
     width: 100px;
 }
 
@@ -58,14 +52,17 @@
 }
 
 #body {
+    background: #fff;
     color: #222;
+    padding-bottom: 20px;
 }
 
 #current-frame {
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    padding: 15px;
+    margin: 0 5px;
+    padding: 15px 10px;
     /* Due to height calculations, this element must have a width set. */
     width: 620px;
 }
@@ -78,7 +75,9 @@
     text-align: center;
 }
 
-#current-frame div.text {
+#current-frame div.text,
+textarea
+{
     font-family: Consolas, "Lucida Console", Monaco, monospace;
     font-size: 14pt;
 }
@@ -93,16 +92,24 @@
 }
 
 #footer {
-    border-top: #888 solid 1px;
+    background: #fff;
+    border-radius: 0 0 5px 5px;
+    -moz-border-radius: 0 0 5px 5px;
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
     color: #888;
     font-size: 8pt;
-    margin-top: 20px;
-    padding: 15px 0;
     text-align: center;
 }
 
 #footer a {
     color: #888;
+}
+
+#footer p {
+    border-top: #888 solid 1px;
+    margin: 0 5px;
+    padding: 15px 0;
 }
 
 #header {
@@ -197,7 +204,7 @@
 }
 
 #notifications p.success a:hover {
-    background: #3a2;
+    background: #5b3;
 }
 
 #page-name {
@@ -234,10 +241,10 @@
 }
 
 body, html {
-    background: #fff;
+    background: #fff url(pattern.jpg);
 }
 
-body, button, input, textarea {
+body, button, input {
     font: 12pt/1.3 "Trebuchet MS", sans-serif;
 }
 
@@ -260,7 +267,7 @@ body.scheme-2 #current-frame {
     background: #fff;
     border: #c4df9b solid 2px;
     color: #111;
-    width: 616px;
+    width: 626px;
 }
 
 body.scheme-2 #current-frame div.text strong,
@@ -284,24 +291,23 @@ body.scheme-3 #current-frame div.text strong {
     font-weight: normal;
 }
 
+button,
+input.password,
+input.text
+{
+    font-size: 17px;
+}
+
+button {
+    float: right;
+    margin-right: 7px;
+    padding: 2px 0;
+    width: 160px;
+}
+
 div.info {
     border-bottom: #ddd solid 1px;
-}
-
-div.info a.close {
-    background: #fee;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    -webkit-border-radius: 5px;
-    color: #800;
-    margin-left: .2em;
-    padding: 0 .3em;
-    text-decoration: none;
-}
-
-div.info a.close:hover {
-    background: #000;
-    color: #fff;
+    margin: 0 5px;
 }
 
 h1 {
@@ -311,19 +317,53 @@ h1 {
     text-indent: 5px;
 }
 
-h3, h4 {
+h3 {
     color: #444;
     font-weight: normal;
-}
-
-h3 {
-    margin: 1em 0 .2em;
+    margin: 1em 5px .2em;
 }
 
 img {
     border: 0;
 }
 
+input.password,
+input.text,
+textarea
+{
+    border: #888 solid 1px;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    padding: 5px;
+    width: 460px;
+}
+
+label {
+    float: left;
+    font-size: 17px;
+    line-height: 34px;
+    width: 160px;
+}
+
 p {
-    margin-bottom: 1em;
+    margin: 0 5px 1em;
+}
+
+p.field {
+    clear: left;
+    margin-bottom: .5em;
+    overflow: auto;
+}
+
+p.field span {
+    display: block;
+    font-size: 13px;
+    line-height: 1.1;
+    color: #888;
+}
+
+textarea {
+    clear: left;
+    width: 620px;
 }
