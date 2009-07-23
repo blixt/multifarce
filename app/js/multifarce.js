@@ -104,6 +104,10 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 this.simpleCall('get_command', {command: commandId});
             },
 
+            getFirstFrame: function () {
+                this.simpleCall('get_first_frame', {});
+            },
+
             getFrame: function (frameId) {
                 this.simpleCall('get_frame', {frame: frameId});
             },
@@ -177,40 +181,69 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
         // Private static members.
         var
         cache = {},
+        currentUser,
 
         // Constructor.
         cls = function (username) {
             EventSource.call(this, 'load');
             
             // Private members.
-            var
-            loaded = false,
-            displayName,
+            var loaded = false, data, error, success;
+
             error = function () {
                 this.clearHandlers();
-                delete cache[username];
-            },
+                if (username) delete cache[username];
+            };
+            
             success = function (user) {
-                displayName = user.display_name;
+                data = user;
                 loaded = true;
                 this.raise('load');
             };
             
             // Getters/setters.
-            this.get_displayName = function () { return displayName; };
-            this.get_username = function () { return username; };
+            this.get_displayName = function () { return data.display_name; };
+            this.get_emailHash = function () { return data.email_md5; };
+            this.get_username = function () { return data.username; };
+            this.isCurrent = function () { return this == currentUser; };
             this.isLoaded = function () { return loaded; };
             
-            // Public members.
-            this.reload = function () {
-                api.success(success, this).error(error, this);
-                api.getUserInfo(username);
-            };
+            if (!username) {
+                this.get_email = function () { return data.email; };
+                this.get_googleEmail = function () {
+                    return data.google_email;
+                };
+                this.get_googleLogUrl = function () {
+                    return data.google_login || data.google_logout;
+                };
+                this.get_googleNickname = function () {
+                    return data.google_nickname;
+                };
+                this.get_type = function () { return data.type; };
+
+                this.googleLoggedIn = function () {
+                    return data.google_logged_in;
+                };
+                this.loggedIn = function () { return data.logged_in; };
+            }
             
-            this.reload();
+            // Public members.
+            this.load = function () {
+                api.success(success, this).error(error, this);
+
+                if (username)
+                    api.getUserInfo(username);
+                else
+                    api.getStatus();
+            };
         };
 
         // Public static members.
+        cls.current = function () {
+            if (!currentUser) currentUser = new cls();
+            return currentUser;
+        };
+        
         cls.get = function (username) {
             if (typeof username != 'string')
                 throw 'Invalid type (username); expected string.';
@@ -247,6 +280,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             },
             // Handle successful getFrame calls.
             frameSuccess = function (frame) {
+                frameId = frame.id;
                 frameTitle = frame.title;
                 this.raise('frame-load', frame);
             };
@@ -295,10 +329,14 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
 
             // Initialize game.
             this.start = function (initFrameId, initFlags) {
-                frameId = initFrameId || 1;
+                frameId = initFrameId || 0;
                 flags = initFlags || [];
                 
-                api.success(frameSuccess, this).getFrame(frameId);
+                api.success(frameSuccess, this);
+                if (frameId > 0)
+                    api.getFrame(frameId);
+                else
+                    api.getFirstFrame();
             };
         };
         
@@ -314,6 +352,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             // Page elements.
             notifications = $('#notifications'),
             pageName = $('#page-name'),
+            username = $('#username'),
+            avatar = $('#avatar img'),
             
             homePage = $('#home'),
             frame = homePage.find('#current-frame'),
@@ -347,7 +387,10 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             // Switcher for the pages.
             pages = new Switcher(homePage, newCommandPage, newFramePage,
                                  notFoundPage, registerPage),
-    
+
+            // Get current user.
+            currentUser = User.current(),
+
             // Helper function for setting the current page.
             setPage = function (title, pageElement) {
                 if (title) {
@@ -468,6 +511,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
 
             // Handler for letting a user register.
             RegisterHandler = Application.handler(function () {
+                setPage('Register', registerPage);
             }),
             
             // Handler for user info page.
@@ -480,6 +524,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 ['^commands/(\d+)$', CommandHandler],
                 ['^commands/new$', NewCommandHandler],
                 ['^frames/new$', NewFrameHandler],
+                ['^register$', RegisterHandler],
                 ['^user/([^/]+)$', UserHandler],
                 ['^.*$', NotFoundHandler]
             ]);
@@ -489,6 +534,18 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 site.exec(newHash);
             });
             $.hash.init();
+            
+            // Handle current user.
+            currentUser.listen('load', function () {
+                if (this.loggedIn()) {
+                    username.text(this.get_displayName());
+                    avatar.attr('src',
+                        'http://www.gravatar.com/avatar/' +
+                        this.get_emailHash() + '?s=28&d=identicon&r=PG');
+                }
+            });
+            
+            currentUser.load();
             
             // Set up game.
             game.listen('frame-load', function (data) {

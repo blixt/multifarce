@@ -1,7 +1,7 @@
 #action,
 #action-go
 {
-    font-size: 14pt;
+    font-size: 19px;
 }
 
 #action {
@@ -20,17 +20,24 @@
 }
 
 #actions {
-    font-size: 8pt;
-    margin: 2px 0 0;
+    float: right;
+    font-size: 16px;
+    line-height: 28px;
+    list-style: none;
+    margin: 0;
     white-space: nowrap;
 }
 
-#actions a {
-    font-weight: bold;
+#actions li {
+    border-right: #692 solid 1px;
+    float: left;
 }
 
-#actions a:hover {
-    text-decoration: underline;
+#actions li a {
+    border-right: #fff solid 1px;
+    display: block;
+    height: 30px;
+    padding: 0 10px;
 }
 
 #avatar {
@@ -215,7 +222,10 @@
 }
 
 #username {
-    font-size: 12pt;
+    float: right;
+    font-size: 18px;
+    line-height: 28px;
+    padding-left: 10px;
 }
 
 * {
@@ -295,7 +305,7 @@ div.info a.close:hover {
 }
 
 h1 {
-    font-size: 19pt;
+    font-size: 25px;
     font-weight: normal;
     padding-top: 4px;
     text-indent: 5px;

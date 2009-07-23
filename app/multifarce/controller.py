@@ -2,12 +2,17 @@
 # Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
 #
 
+import md5
+
 from google.appengine.api import users
 from google.appengine.ext import db
 
 import blixt.appengine.db
 import multifarce
 from multifarce import model
+
+# TODO: This should somehow be more dynamic.
+FIRST_FRAME_ID = 1
 
 class MultifarceController(object):
     def create_command(self, frame, commands, text, go_to_frame=None,
@@ -85,6 +90,9 @@ class MultifarceController(object):
                   'flags_required': command.flags_required}
         return result
 
+    def get_first_frame(self):
+        return self.get_frame(FIRST_FRAME_ID)
+
     def get_frame(self, frame):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
@@ -129,6 +137,7 @@ class MultifarceController(object):
             result['username'] = user.key().name()
             result['display_name'] = user.display_name
             result['email'] = user.email
+            result['email_md5'] = md5.new(user.email.lower()).hexdigest()
             result['type'] = 'local' if user.password else 'google'
             result['logged_in'] = True
         else:
@@ -144,9 +153,10 @@ class MultifarceController(object):
         if not user:
             raise multifarce.NotFoundError('The specified user could not be '
                                            'found.', 'USER_NOT_FOUND')
+
         result = {'username': user.key().name(),
                   'display_name': user.display_name,
-                  'avatar': user.avatar} # TODO: avatar will be URL to gravatar
+                  'email_md5': md5.new(user.email.lower()).hexdigest()}
         return result
 
     def log_in(self, username, password):
