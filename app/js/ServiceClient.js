@@ -105,7 +105,7 @@ var ServiceClient = (function (jQuery, JSON) {
             // Build query parameters.
             var q = [];
             for (var key in args) {
-                var json = JSON.dumps(args[key]);
+                var json = JSON.stringify(args[key]);
                 if (json) q[q.length] = key + '=' + encodeURIComponent(json);
             }
 

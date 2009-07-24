@@ -231,12 +231,12 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             EventSource.call(this, 'load');
             
             // Private members.
-            var loaded = false, data, error, success;
+            var loaded = false, data,
 
             error = function () {
                 this.clearHandlers();
                 if (username) delete cache[username];
-            };
+            },
             
             success = function (user) {
                 data = user;
@@ -271,7 +271,12 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             }
             
             // Public members.
-            this.load = function () {
+            this.load = function (data) {
+                if (data) {
+                    success.call(this, data);
+                    return;
+                }
+            
                 api.success(success, this).error(error, this);
 
                 if (username)
@@ -296,6 +301,36 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             } else {
                 cache[username] = new cls(username);
             }
+        };
+        
+        cls.logIn = function (username, password) {
+            var cur = cls.current();
+            
+            if (cur.loggedIn()) {
+                alert('You\'re already logged in!');
+                return;
+            }
+            
+            api.success(function (user) {
+                cur.load(user);
+            });
+
+            api.logIn(username, password);
+        };
+        
+        cls.logOut = function () {
+            var cur = cls.current();
+            
+            if (!cur.loggedIn()) {
+                alert('You\'re not logged in!');
+                return;
+            }
+            
+            api.success(function () {
+                cur.load();
+            });
+
+            api.logOut();
         };
 
         return cls;
@@ -409,6 +444,9 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             frameLog = homePage.find('#log'),
 
             logInPage = $('#log-in'),
+            logInGo = $('#log-in-go'),
+            logInUsername = $('#log-in-username'),
+            logInPassword = $('#log-in-password'),
 
             newCommandPage = $('#new-command'),
             newCommandFrame = $('#new-command-frame'),
@@ -520,6 +558,12 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             // Handler for letting a user log in.
             LogInHandler = Application.handler(function () {
                 setPage('Log in', logInPage);
+                
+                logInGo.click(function () {
+                    User.logIn(logInUsername.val(), logInPassword.val());
+                    logInUsername.val('');
+                    logInPassword.val('');
+                });
             }),
 
             // Handler for creating a new command.
@@ -608,14 +652,37 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 }
                 
                 // Handle Google Accounts notices.
+                var show, hide;
                 if (this.googleLoggedIn()) {
-                    // TODO: Change this code so that the Google notices appear
-                    //       if the user logs out of Google Accounts.
-                    allPages.find('div.google-accounts').remove();
+                    show = 'div.google';
+                    hide = 'div.not-google';
                 } else {
-                    allPages.find('a.google-accounts')
-                        .attr('href', this.get_googleLogUrl());
+                    show = 'div.not-google';
+                    hide = 'div.google';
                 }
+
+                if (this.loggedIn()) {
+                    show += ', div.multifarce';
+                    hide += ', div.not-multifarce';
+                } else {
+                    show += ', div.not-multifarce';
+                    hide += ', div.multifarce';
+                }
+
+                allPages.find(show).each(function () {
+                    var el = $(this), hidden = el.data('hidden');
+                    if (hidden) el.append(hidden);
+                    el.removeData('hidden');
+                });
+
+                allPages.find(hide).each(function () {
+                    var el = $(this);
+                    if (el.data('hidden')) return;
+                    el.data('hidden', el.children().remove());
+                });
+
+                allPages.find('a.google-accounts')
+                    .attr('href', this.get_googleLogUrl());
             });
             
             currentUser.load();

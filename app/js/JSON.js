@@ -7,11 +7,12 @@
  * Encodes/decodes JavaScript values as JSON (see http://json.org/)
  */
 /* Example:
- *     var json = JSON.dumps({abc: 123, def: "ghi", jkl: [4, 5, 6]});
+ *     var json = JSON.stringify({abc: 123, def: "ghi", jkl: [4, 5, 6]});
  *     // Same result as:
  *     var json = '{"abc":123,"def":"ghi","jkl":[4,5,6]}';
  */
 
+if (!JSON) // Prevent hiding the native JSON object in browsers that support it.
 var JSON = (function () {
     var
     // Missing \u2060-\u206f which won't parse in older Opera browsers.
@@ -29,7 +30,7 @@ var JSON = (function () {
     return {
         // Takes a value and returns its JSON representation, or null if the
         // value could not be converted to JSON.
-        dumps: function (value) {
+        stringify: function (value) {
             switch (typeof value) {
                 case 'string':
                     return '"' + value.replace(escapable, replace) + '"';
@@ -40,15 +41,15 @@ var JSON = (function () {
 
                     if (value instanceof Array) {
                         for (i = 0, l = value.length; i < l; i++) {
-                            if ((json = JSON.dumps(value[i])) != null)
+                            if ((json = JSON.stringify(value[i])) != null)
                                 v[v.length] = json;
                         }
                         return '[' + v + ']';
                     }
 
                     for (p in value) {
-                        if ((json = JSON.dumps(value[p])) != null)
-                            v[v.length] = JSON.dumps(p) + ':' + json;
+                        if ((json = JSON.stringify(value[p])) != null)
+                            v[v.length] = JSON.stringify(p) + ':' + json;
                     }
                     return '{' + v + '}';
                 case 'number':
@@ -61,7 +62,7 @@ var JSON = (function () {
         },
         // Loads the JSON string and returns the value that it represents. Does
         // not check validity or security of the string!
-        loads: function (json) {
+        parse: function (json) {
             if (typeof json != 'string') return null;
             return JSON.e('(' + json + ')');
         }
