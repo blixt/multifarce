@@ -14,12 +14,12 @@ import waveapi.model
 import waveapi.robot
 
 INIT_FRAME_ID = 1
-NEW_COMMAND = 'http://multifarce.appspot.com/#commands/new?frame_id=%d'
+NEW_COMMAND = 'http://beta.multifarce.com/#commands/new?frame_id=%d'
 HINTS = ['A text-adventure bot!',
-         'YOU can continue the story! http://multifarce.appspot.com/',
+         'YOU can continue the story! http://beta.multifarce.com/',
          'Reply with a command to play!',
-         'A community project! http://multifarce.appspot.com/',
-         'This project is open source! http://multifarce.appspot.com/',
+         'A community project! http://beta.multifarce.com/',
+         'This project is open source! http://beta.multifarce.com/',
          'I put on my robe and wizard hat.']
 
 class MultifarceBot(object):

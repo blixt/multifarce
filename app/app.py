@@ -18,7 +18,7 @@ import blixt.appengine.cache
 
 import multifarce.controller
 import multifarce.model
-import multifarce.viewer
+import multifarce.view
 
 # Uncomment the line below to disable caching.
 blixt.appengine.cache.enabled = False
@@ -82,10 +82,16 @@ class HomeHandler(webapp.RequestHandler):
 ##        frame.image_id = img_data.key().id()
 ##        frame.put()
 
+class DummyHandler(webapp.RequestHandler):
+    def get(self):
+        pass
+
 def main():
     application = webapp.WSGIApplication([
         ('/', HomeHandler),
-        ('/api/(\\w*)', multifarce.viewer.MultifarceService),
+        ('/api/(\\w*)', multifarce.view.MultifarceService),
+        # Specific to *.multifarce.com
+        ('/googlee3ef4462fc530463.html', DummyHandler),
 ##        ('/image/(\\d+)', ImageHandler),
 ##        ('/upload', UploadHandler),
     ])

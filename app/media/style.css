@@ -9,7 +9,6 @@
 
 #action-go {
     float: none;
-    margin: 0;
     width: 100px;
 }
 
@@ -19,19 +18,20 @@
     line-height: 28px;
     list-style: none;
     margin: 0;
-    white-space: nowrap;
+    width: 150px;
 }
 
 #actions li {
     border-right: #692 solid 1px;
     float: left;
+    text-align: center;
+    width: 74px;
 }
 
 #actions li a {
     border-right: #fff solid 1px;
     display: block;
     height: 30px;
-    padding: 0 10px;
 }
 
 #avatar {
@@ -61,10 +61,17 @@
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    margin: 0 5px;
-    padding: 15px 10px;
+    margin: 0 10px;
+    padding: 15px;
     /* Due to height calculations, this element must have a width set. */
-    width: 620px;
+    width: 600px;
+}
+
+#current-frame h3,
+#current-frame p
+{
+    margin-left: 0;
+    margin-right: 0;
 }
 
 #current-frame h3 {
@@ -97,6 +104,7 @@ textarea
     -moz-border-radius: 0 0 5px 5px;
     -webkit-border-bottom-left-radius: 5px;
     -webkit-border-bottom-right-radius: 5px;
+    clear: both;
     color: #888;
     font-size: 8pt;
     text-align: center;
@@ -108,7 +116,7 @@ textarea
 
 #footer p {
     border-top: #888 solid 1px;
-    margin: 0 5px;
+    margin: 0 10px;
     padding: 15px 0;
 }
 
@@ -215,7 +223,7 @@ textarea
     -webkit-border-bottom-left-radius: 5px;
     -webkit-border-bottom-right-radius: 5px;
     font-size: 11pt;
-    margin-bottom: 1em;
+    margin-bottom: 10px;
     padding: 2px 6px 4px;
 }
 
@@ -240,12 +248,21 @@ textarea
     padding: 0;
 }
 
+/*
+ * Many thanks to Travis Beckham of squidfingers.com 
+ * for his excellent library of free backgrounds!
+ * pattern below has had its colors modified.
+ */
 body, html {
-    background: #fff url(pattern.jpg);
+    background: #fff url(pattern.gif);
 }
 
 body, button, input {
     font: 12pt/1.3 "Trebuchet MS", sans-serif;
+}
+
+body.loading h1 {
+    background: url(loading.gif) no-repeat 130px 50%;
 }
 
 body.scheme-1 #current-frame {
@@ -300,27 +317,29 @@ input.text
 
 button {
     float: right;
-    margin-right: 7px;
     padding: 2px 0;
     width: 160px;
 }
 
 div.info {
     border-bottom: #ddd solid 1px;
-    margin: 0 5px;
+    margin: 0 10px;
+    overflow: auto;
 }
 
 h1 {
     font-size: 25px;
     font-weight: normal;
-    padding-top: 4px;
+    height: 34px;
+    line-height: 34px;
     text-indent: 5px;
 }
 
 h3 {
+    clear: left;
     color: #444;
     font-weight: normal;
-    margin: 1em 5px .2em;
+    margin: 1em 10px .2em;
 }
 
 img {
@@ -335,11 +354,13 @@ textarea
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
+    float: left;
     padding: 5px;
-    width: 460px;
+    width: 458px;
 }
 
 label {
+    color: #444;
     float: left;
     font-size: 17px;
     line-height: 34px;
@@ -347,13 +368,17 @@ label {
 }
 
 p {
-    margin: 0 5px 1em;
+    margin: 0 10px 1em;
+}
+
+p.field.disabled label {
+    color: #888;
 }
 
 p.field {
     clear: left;
+    min-height: 34px;
     margin-bottom: .5em;
-    overflow: auto;
 }
 
 p.field span {
@@ -363,7 +388,12 @@ p.field span {
     color: #888;
 }
 
+p.head {
+    margin-bottom: 0;
+}
+
 textarea {
     clear: left;
-    width: 620px;
+    float: none;
+    width: 618px;
 }

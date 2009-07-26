@@ -326,6 +326,10 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 return;
             }
             
+            if (cur.googleLoggedIn()) {
+                location.href = cur.get_googleLogUrl();
+            }
+            
             api.success(function () {
                 cur.load();
             });
@@ -448,6 +452,8 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             logInUsername = $('#log-in-username'),
             logInPassword = $('#log-in-password'),
 
+            logOutPage = $('#log-out'),
+
             newCommandPage = $('#new-command'),
             newCommandFrame = $('#new-command-frame'),
             newCommand1 = $('#new-command-1'),
@@ -468,10 +474,17 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             notFoundPath = $('#not-found-path'),
 
             registerPage = $('#register'),
+            registerGo = $('#register-go'),
+            registerUsername = $('#register-username'),
+            registerDisplayName = $('#register-name'),
+            registerEmail = $('#register-email'),
+            registerPassword = $('#register-password'),
 
             // Switcher for the pages.
-            pages = new Switcher(homePage, logInPage, newCommandPage,
-                                 newFramePage, notFoundPage, registerPage),
+            // TODO: Support selectors.
+            pages = new Switcher(homePage, logInPage, logOutPage,
+                                 newCommandPage, newFramePage, notFoundPage,
+                                 registerPage),
 
             // Get current user.
             currentUser = User.current(),
@@ -487,7 +500,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
 
             // Helper function for executing a command.
             execute = function () {
-                var command = frameAction.val();
+                var command = frameAction.val().toLowerCase();
                 if (!command) return;
 
                 frameAction.val('');
@@ -544,7 +557,7 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                     $.hash.go('?state=' + game.get_state());
                 }
 
-                setPage(game.get_frameTitle(), homePage);
+                setPage(game.get_frameTitle() || 'Hello World!', homePage);
 
                 if (!frameAction.hasEvent('keydown')) {
                     frameAction.keydown(function (event) {
@@ -565,6 +578,13 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                     logInPassword.val('');
                 });
             }),
+            
+            // Handler for letting a user log out.
+            LogOutHandler = Application.handler(function () {
+                setPage('Log out', logOutPage);
+                
+                User.logOut();
+            }),
 
             // Handler for creating a new command.
             NewCommandHandler = Application.handler(function () {
@@ -573,8 +593,14 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 
                 api.success(function (frames) {
                     for (var i = 0; i < frames.length; i++) {
-                        newCommandFrame.append($('<option/>').val(frames[i].id).text(frames[i].title));
-                        newCommandGoToFrame.append($('<option/>').val(frames[i].id).text(frames[i].title));
+                        newCommandFrame.append(
+                            $('<option/>')
+                                .val(frames[i].id)
+                                .text(frames[i].title));
+                        newCommandGoToFrame.append(
+                            $('<option/>')
+                                .val(frames[i].id)
+                                .text(frames[i].title));
                     }
                 }).getFrames();
 
@@ -618,6 +644,23 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
             // Handler for letting a user register.
             RegisterHandler = Application.handler(function () {
                 setPage('Register', registerPage);
+                
+                // TODO: Improve this. Needs password/repeat password verify
+                //       etc.
+                registerGo.click(function () {
+                    api.success(function () {
+                        alert('Success!');
+                        if (currentUser.googleLoggedIn()) {
+                            currentUser.load();
+                            $.hash.go('');
+                        } else {
+                            $.hash.go('log-in');
+                        }
+                    });
+                    api.register(
+                        registerUsername.val(), registerDisplayName.val(),
+                        registerPassword.val() || null, registerEmail.val());
+                });
             }),
             
             // Handler for user info page.
@@ -631,10 +674,20 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                 ['^commands/new$', NewCommandHandler],
                 ['^frames/new$', NewFrameHandler],
                 ['^log-in$', LogInHandler],
+                ['^log-out$', LogOutHandler],
                 ['^register$', RegisterHandler],
                 ['^user/([^/]+)$', UserHandler],
                 ['^.*$', NotFoundHandler]
             ]);
+
+            // Set up loading animation.
+            $('body')
+                .ajaxStart(function () {
+                    $(this).addClass('loading');
+                })
+                .ajaxStop(function () {
+                    $(this).removeClass('loading');
+                });
 
             // Set up application to use hash as the path.
             $(document).hashchange(function (e, newHash) {
@@ -649,6 +702,10 @@ var Multifarce = (function (Application, EventSource, Hash, $, ServiceClient) {
                     avatar.attr('src',
                         'http://www.gravatar.com/avatar/' +
                         this.get_emailHash() + '?s=28&d=identicon&r=PG');
+                } else {
+                    username.text('Not logged in');
+                    avatar.attr('src', 'http://www.gravatar.com/avatar/' +
+                                       '?s=28&d=identicon&r=PG');
                 }
                 
                 // Handle Google Accounts notices.

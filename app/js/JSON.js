@@ -12,7 +12,8 @@
  *     var json = '{"abc":123,"def":"ghi","jkl":[4,5,6]}';
  */
 
-if (!JSON) // Prevent hiding the native JSON object in browsers that support it.
+// Prevent hiding the native JSON object in browsers that support it.
+if (!JSON) {
 var JSON = (function () {
     var
     // Missing \u2060-\u206f which won't parse in older Opera browsers.
@@ -71,3 +72,4 @@ var JSON = (function () {
 
 // Create an eval that does not have access to closures.
 JSON.e = function (c) { return eval(c); };
+}

@@ -285,10 +285,10 @@ class User(db.Model):
         return user
 
     @staticmethod
-    def register(username, display_name, password=None, email=None):
+    def register(username, display_name, email, password=None):
         """Creates a new user that is registered to the application. If the user
-        is logged in with a Google account and e-mail and password is not
-        supplied, the new user will be linked to the Google account.
+        is logged in with a Google account and password is not supplied, the new
+        user will be linked to the Google account.
 
         Only the SHA-256 hash of the password will be stored so that in case the
         database should be exposed, the passwords would not be of any use to the
@@ -315,7 +315,7 @@ class User(db.Model):
                 raise multifarce.UsernameError(
                     'Username is already in use.',
                     'USERNAME_IN_USE')
-        except UsernameError, e:
+        except multifarce.UsernameError, e:
             raise multifarce.RegisterError(
                 'Could not use username (%s)' % e,
                 e.code)
@@ -330,7 +330,7 @@ class User(db.Model):
                     'Display name must not be any longer than 20 characters.',
                     'DISPLAY_NAME_TOO_LONG')
 
-            if not re.match('^[A-Z0-9a-z]([\\-\\._~\'" ]*[A-Z0-9a-z]+)*$',
+            if not re.match('^[A-Z0-9a-z]([-._~\'" ]*[A-Z0-9a-z-~!"]+)*$',
                             display_name):
                 raise multifarce.UsernameError(
                     'Display name should consist of letters and/or digits, '
@@ -343,12 +343,19 @@ class User(db.Model):
                 raise multifarce.UsernameError(
                     'Display name is already in use.',
                     'DISPLAY_NAME_IN_USE')
-        except UsernameError, e:
+        except multifarce.UsernameError, e:
             raise multifarce.RegisterError(
                 'Could not use display name (%s)' % e,
                 e.code)
 
-        if email is None and password is None:
+        try:
+            mail.check_email_valid(email, 'to')
+        except mail.InvalidEmailError:
+            raise multifarce.RegisterError(
+                'A valid e-mail address must be provided.',
+                'INVALID_EMAIL')
+        
+        if password is None:
             google_user = users.get_current_user()
             if not google_user:
                 raise multifarce.RegisterError(
@@ -363,20 +370,13 @@ class User(db.Model):
             user = User(key_name=username.lower(),
                         user=google_user,
                         display_name=display_name,
-                        email=db.Email(google_user.email()),
+                        email=db.Email(email),
                         state='member')
         elif len(password) < 4:
             raise multifarce.RegisterError(
                 'Password must be at least 4 characters long.',
                 'INVALID_PASSWORD')
         else:
-            try:
-                mail.check_email_valid(email, 'to')
-            except mail.InvalidEmailError:
-                raise multifarce.RegisterError(
-                    'A valid e-mail address must be provided.',
-                    'INVALID_EMAIL')
-            
             user = User(key_name=username.lower(),
                         user=users.User('user@multifarce.com'),
                         display_name=display_name,

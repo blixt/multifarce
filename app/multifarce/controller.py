@@ -21,8 +21,9 @@ class MultifarceController(object):
         """
         user = model.User.get_current(self)
         if not user:
-            raise multifarce.NotLoggedInError('You must be logged in to create '
-                                              'commands.', 'MUST_BE_LOGGED_IN')
+            raise multifarce.NotLoggedInError(
+                'You must be logged in to create commands.',
+                'MUST_BE_LOGGED_IN')
 
         # Create command.
         cmd = model.Command.create(user, frame, commands, text, go_to_frame,
@@ -35,8 +36,8 @@ class MultifarceController(object):
         """
         user = model.User.get_current(self)
         if not user:
-            raise multifarce.NotLoggedInError('You must be logged in to create '
-                                              'frames.', 'MUST_BE_LOGGED_IN')
+            raise multifarce.NotLoggedInError(
+                'You must be logged in to create frames.', 'MUST_BE_LOGGED_IN')
 
         # Create frame.
         frame = model.Frame.create(user, title, text)
@@ -56,8 +57,8 @@ class MultifarceController(object):
 
         for flag in command.flags_required:
             if flag not in flags:
-                raise multifarce.ExecuteError('You can\'t do that yet.' % flag,
-                                              'FLAG_REQUIRED')
+                raise multifarce.ExecuteError(
+                    'You can\'t do that right now.' % flag, 'FLAG_REQUIRED')
 
         for flag in command.flags_on:
             if flag not in flags:
@@ -79,8 +80,9 @@ class MultifarceController(object):
         command = blixt.appengine.db.get_instance(command, model.Command)
 
         if not command:
-            raise multifarce.GetCommandError('The specified command could not '
-                                             'be found.', 'COMMAND_NOT_FOUND')
+            raise multifarce.GetCommandError(
+                'The specified command could not be found.',
+                'COMMAND_NOT_FOUND')
 
         result = {'id': command.key().id(), 'author': command.user_name,
                   'frame_id': command.frame_id, 'synonyms': command.synonyms,
@@ -97,8 +99,8 @@ class MultifarceController(object):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
         if not frame:
-            raise multifarce.GetFrameError('The specified frame could not be '
-                                           'found.', 'FRAME_NOT_FOUND')
+            raise multifarce.GetFrameError(
+                'The specified frame could not be found.', 'FRAME_NOT_FOUND')
 
         result = {'id': frame.key().id(), 'author': frame.user_name,
                   'title': frame.title, 'text': frame.text}
@@ -151,8 +153,8 @@ class MultifarceController(object):
         """
         user = blixt.appengine.db.get_instance(user, model.User)
         if not user:
-            raise multifarce.NotFoundError('The specified user could not be '
-                                           'found.', 'USER_NOT_FOUND')
+            raise multifarce.NotFoundError(
+                'The specified user could not be found.', 'USER_NOT_FOUND')
 
         result = {'username': user.key().name(),
                   'display_name': user.display_name,
@@ -175,7 +177,7 @@ class MultifarceController(object):
         if user:
             user.end_session(self)
 
-    def register(self, username, display_name, password=None, email=None):
+    def register(self, username, display_name, email, password=None):
         """Registers a user to Multifarce. If password and e-mail is omitted,
         the user will be linked to the currently logged in Google account (or
         fails if the user is not logged in with a Google account.)
@@ -184,4 +186,4 @@ class MultifarceController(object):
         their e-mail before they can log in. If linking to a Google account,
         no activation is required.
         """
-        model.User.register(username, display_name, password, email)
+        model.User.register(username, display_name, email, password)

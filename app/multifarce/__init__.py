@@ -5,7 +5,25 @@
 __all__ = ['controller', 'model', 'viewer', 'Error', 'CreateCommandError',
            'CreateFrameError', 'InternalError', 'InvalidOperationError',
            'LogInError', 'NotFoundError', 'NotLoggedInError', 'RegisterError',
-           'UploadError', 'UsernameError']
+           'UploadError', 'UsernameError', 'SYNONYMS', 'STOP_WORDS']
+
+# Words that will be merged, to make it easier to "find" a command. The first
+# word will be the one that's really stored in the database and later used for
+# finding the command.
+# This has to be carefully balanced so that intricacies of the language aren't
+# lost. Avoid words that can be more than one type (e.g. view which can be both
+# noun and verb.)
+# Can also be used to correct common misspellings.
+SYNONYMS = [
+    ('go', 'walk', 'travel'),
+    ('inspect', 'look at'),
+    ('get', 'pick up', 'take', 'fetch'),
+    ('run', 'sprint'),
+    ('jump', 'leap', 'hop'),
+]
+
+# Words that will be ignored (removed.)
+STOP_WORDS = ['a', 'an', 'the']
 
 class Error(Exception):
     """Base of all exceptions in the multifarce package."""
