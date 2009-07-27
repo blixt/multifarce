@@ -339,7 +339,8 @@ class User(db.Model):
                     'DISPLAY_NAME_INVALID_CHARACTERS')
 
             # XXX: Case sensitive
-            if User.all().filter('display_name =', display_name).get():
+            qry = User.all(keys_only=True).filter('display_name', display_name)
+            if qry.get():
                 raise multifarce.UsernameError(
                     'Display name is already in use.',
                     'DISPLAY_NAME_IN_USE')
@@ -354,6 +355,11 @@ class User(db.Model):
             raise multifarce.RegisterError(
                 'A valid e-mail address must be provided.',
                 'INVALID_EMAIL')
+
+        if User.all(keys_only=True).filter('email', email).get():
+            raise multifarce.RegisterError(
+                'E-mail address is already in use.',
+                'EMAIL_IN_USE')
         
         if password is None:
             google_user = users.get_current_user()
@@ -362,7 +368,7 @@ class User(db.Model):
                     'Must be logged in through Google Accounts to be able to '
                     'register a linked user.',
                     'MUST_LOG_IN_GOOGLE')
-            if User.all().filter('user =', google_user).get():
+            if User.all(keys_only=True).filter('user', google_user).get():
                 raise multifarce.RegisterError(
                     'The current Google account is already linked to an '
                     'existing user.',

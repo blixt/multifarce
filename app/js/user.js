@@ -86,10 +86,7 @@ var User = (function () {
     cls.logIn = function (username, password) {
         var cur = cls.current();
         
-        if (cur.loggedIn()) {
-            alert('You\'re already logged in!');
-            return;
-        }
+        if (cur.loggedIn()) return;
         
         api.success(function (user) {
             cur.load(user);
@@ -101,13 +98,11 @@ var User = (function () {
     cls.logOut = function () {
         var cur = cls.current();
         
-        if (!cur.loggedIn()) {
-            alert('You\'re not logged in!');
-            return;
-        }
+        if (!cur.loggedIn()) return;
         
         if (cur.googleLoggedIn()) {
             location.href = cur.get_googleLogUrl();
+            return;
         }
         
         api.success(function () {

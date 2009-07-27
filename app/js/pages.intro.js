@@ -5,6 +5,8 @@ var
 allPages = $('div.page'),
 avatar = $('#avatar img'),
 username = $('#username'),
+action1 = $('#action-1 a'),
+action2 = $('#action-2 a'),
 
 // Make functions defined in the function below available in the current scope.
 getPage, setPage, notify;
