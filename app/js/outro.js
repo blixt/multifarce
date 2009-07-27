@@ -1,0 +1,9 @@
+})(
+document,
+window,
+Application,
+EventSource,
+Hash,
+jQuery,
+ServiceClient
+);

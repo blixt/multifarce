@@ -3,14 +3,30 @@ import os, os.path, shutil
 YUI_COMPRESSOR = 'yuicompressor-2.4.2.jar'
 
 SCRIPTS = [
-    'app/js/EventSource.js',
-    'app/js/Hash.js',
-    'app/js/JSON.js',
-    'app/js/ServiceClient.js',
-    'app/js/jquery.hash.js',
-    'app/js/Application.js',
-    'app/js/multifarce.js',
+    'app/js/libs/EventSource.js',
+    'app/js/libs/Hash.js',
+    'app/js/libs/JSON.js',
+    'app/js/libs/ServiceClient.js',
+    'app/js/libs/jquery.hash.js',
+    'app/js/libs/Application.js',
+    'app/js/intro.js',
+    'app/js/jquery-extras.js',
+    'app/js/settings.js',
+    'app/js/api.js',
+    'app/js/game.js',
+    'app/js/user.js',
+    'app/js/pages.intro.js',
+    'app/js/pages.home.js',
+    'app/js/pages.log-in.js',
+    'app/js/pages.log-out.js',
+    'app/js/pages.new-command.js',
+    'app/js/pages.new-frame.js',
+    'app/js/pages.not-found.js',
+    'app/js/pages.register.js',
+    'app/js/pages.outro.js',
+    'app/js/outro.js',
     ]
+SCRIPTS_OUT_DEBUG = 'app/js/multifarce.js'
 SCRIPTS_OUT = 'app/js/multifarce.min.js'
 
 STYLESHEETS = [
@@ -50,11 +66,11 @@ def compress(in_files, out_file, in_type='js', verbose=False,
     print 'Reduction: %.1f%%' % (float(org_size - new_size) / org_size * 100)
     print ''
 
-    os.remove(temp_file)
+    #os.remove(temp_file)
 
 def main():
     print 'Compressing JavaScript...'
-    compress(SCRIPTS, SCRIPTS_OUT, 'js')
+    compress(SCRIPTS, SCRIPTS_OUT, 'js', False, SCRIPTS_OUT_DEBUG)
 
     print 'Compressing CSS...'
     compress(STYLESHEETS, STYLESHEETS_OUT, 'css')

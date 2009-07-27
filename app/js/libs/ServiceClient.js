@@ -11,15 +11,13 @@ var ServiceClient = (function (jQuery, JSON) {
     // Private static members.
     var
     ajaxError = function (state, options, xhr, status) {
-        if (status != 'timeout') return;
-        
         state.attempts++;
         if (state.attempts < 3) {
             jQuery.ajax(options);
         } else {
             var response = {
                 message: 'The request failed after ' + state.attempts +
-                         ' attempt(s).',
+                         ' attempts.',
                 type: 'JavaScriptError'};
             if (state.onError)
                 state.onError.call(state.bindError || state.bind, response);
@@ -68,7 +66,7 @@ var ServiceClient = (function (jQuery, JSON) {
             
             if (typeof func != 'function')
                 throw 'Type error (func); expected function or null.';
-            if (typeof bind != 'object')
+            if (typeof bind != 'object' && typeof bind != 'undefined')
                 throw 'Type error (bind); expected object.';
             
             errorHandler = func;

@@ -215,6 +215,10 @@ textarea
     background: #5b3;
 }
 
+#notifications span.close {
+    float: right;
+}
+
 #page-name {
     background: #444;
     color: #eee;
