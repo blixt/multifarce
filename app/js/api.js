@@ -49,6 +49,10 @@ var api = {
         this.simpleCall('get_status', {path: path});
     },
     
+    getTopCommands: function (frameId) {
+        this.simpleCall('get_top_commands', {frame: frameId});
+    },
+    
     getUserInfo: function (username) {
         this.simpleCall('get_user_info', {user: username});
     },

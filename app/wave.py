@@ -88,6 +88,8 @@ class MultifarceBot(object):
 
         # Attempt to get multifarce state from parent blip.
         parent = self.context.GetBlipById(blip.GetParentBlipId())
+        if not parent:
+            return
         state = blixt.wave.get_annotations(parent, 'multifarce')
         if len(state) > 0:
             try:

@@ -68,8 +68,10 @@ getPage, setPage, notify;
     };
 })();
 
-// Set up loading animation for requests.
 $('body')
+    // Now that the DOM has been set up, remove CSS class.
+    .removeClass('dom-loading')
+    // Set up loading animation for requests.
     .ajaxStart(function () {
         $(this).addClass('loading');
     })

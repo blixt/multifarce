@@ -32,6 +32,9 @@ execute = function () {
     action.focus();
 };
 
+// TODO: Find a better way to display the log.
+log.remove();
+
 // Set up events.
 $('#action').live('keydown', function (event) {
     if (event.keyCode == 13) execute();

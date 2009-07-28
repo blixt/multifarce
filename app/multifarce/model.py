@@ -9,6 +9,7 @@ from google.appengine.api import mail, images, users
 from google.appengine.ext import db
 
 import blixt.appengine.db
+import translitcodec
 
 import multifarce
 
@@ -29,10 +30,31 @@ class Command(db.Model):
     @staticmethod
     def clean(command):
         """Cleans command/flag names. Makes the name lower case, removes
-        non-alphanumeric characters and extraneous whitespace.
+        non-alpha characters and extraneous whitespace.
         """
-        return re.sub(
-            '[^A-Za-z ]|(?<= ) +', '', command).strip().lower()
+        # Transliterate international characters.
+        if not isinstance(command, unicode):
+            command = unicode(command, 'UTF-8')
+        command = command.encode('translit/long/ascii', 'ignore').lower()
+
+        # Only keep letters and whitespace.
+        # XXX: Keep numbers too?
+        command = re.sub('[^a-z ]+', '', command)
+
+        # Remove certain words from the command.
+        for word in multifarce.STOP_WORDS:
+            command = re.sub(r'\b%s\b' % word, '', command)
+
+        # Remove extraneous whitespace.
+        command = re.sub(' {2,}', ' ', command)
+
+        # Replace certain words/phrases with a common synonym.
+        for words in multifarce.SYNONYMS:
+            to = words[0]
+            for i in xrange(1, len(words)):
+                command = re.sub(r'\b%s\b' % words[i], to, command)
+
+        return command.strip()
 
     @staticmethod
     def create(user, frame, commands, text, go_to_frame=None,
@@ -132,8 +154,51 @@ class Command(db.Model):
             raise FindCommandError('The specified frame does not exist.',
                                    'FRAME_NOT_FOUND')
         command = Command.clean(command)
+        CommandUsage.increment(frame, command)
         return Command.gql('WHERE frame_id = :frame AND synonyms = :synonyms',
                            frame=frame, synonyms=command).get()
+
+# Class for keeping statistics of command usage. Each counter is specific to a
+# frame and command. The key name has a :0 suffix to support future use of
+# sharding, if the need arises.
+class CommandUsage(db.Model):
+    frame_id = db.IntegerProperty(required=True)
+    text = db.StringProperty(required=True)
+    count = db.IntegerProperty(required=True, default=0)
+
+    @staticmethod
+    def make_key_name(frame, text, shard=0):
+        frame = blixt.appengine.db.get_id_or_name(frame, Frame)
+        return 'f%d:%s:%d' % (frame, text, shard)
+
+    @staticmethod
+    def get_count(frame, text):
+        key_name = CommandUsage.make_key_name(frame, text)
+        counter = CommandUsage.get_by_key_name(key_name)
+        if counter:
+            return counter.count
+        return 0
+
+    @staticmethod
+    def get_top(frame, limit=10):
+        # XXX: Needs better handling if shards get implemented.
+        frame = blixt.appengine.db.get_id_or_name(frame, Frame)
+        qry = CommandUsage.all().filter('frame_id', frame).order('-count')
+
+        return [cmd for cmd in qry.fetch(limit)]
+
+    @staticmethod
+    def increment(frame, text):
+        frame = blixt.appengine.db.get_id_or_name(frame, Frame)
+        key_name = CommandUsage.make_key_name(frame, text)
+        def txn():
+            counter = CommandUsage.get_by_key_name(key_name)
+            if not counter:
+                counter = CommandUsage(
+                    key_name=key_name, frame_id=frame, text=text)
+            counter.count += 1
+            counter.put()
+        db.run_in_transaction(txn)
 
 class Frame(db.Model):
     user_name = db.StringProperty(required=True)

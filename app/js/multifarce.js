@@ -847,6 +847,10 @@ var api = {
         this.simpleCall('get_status', {path: path});
     },
     
+    getTopCommands: function (frameId) {
+        this.simpleCall('get_top_commands', {frame: frameId});
+    },
+    
     getUserInfo: function (username) {
         this.simpleCall('get_user_info', {user: username});
     },
@@ -926,6 +930,7 @@ var game = (function () {
     frameSuccess = function (frame) {
         frameId = frame.id;
         frameTitle = frame.title;
+        api.getTopCommands(frame.id);
         this.raise('frame-load', frame);
     };
     
@@ -1176,8 +1181,10 @@ getPage, setPage, notify;
     };
 })();
 
-// Set up loading animation for requests.
 $('body')
+    // Now that the DOM has been set up, remove CSS class.
+    .removeClass('dom-loading')
+    // Set up loading animation for requests.
     .ajaxStart(function () {
         $(this).addClass('loading');
     })
@@ -1227,6 +1234,9 @@ execute = function () {
     
     action.focus();
 };
+
+// TODO: Find a better way to display the log.
+log.remove();
 
 // Set up events.
 $('#action').live('keydown', function (event) {

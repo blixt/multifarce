@@ -22,6 +22,7 @@ var game = (function () {
     frameSuccess = function (frame) {
         frameId = frame.id;
         frameTitle = frame.title;
+        api.getTopCommands(frame.id);
         this.raise('frame-load', frame);
     };
     

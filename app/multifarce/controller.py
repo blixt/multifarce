@@ -92,6 +92,20 @@ class MultifarceController(object):
                   'flags_required': command.flags_required}
         return result
 
+    def get_commands(self, by=None):
+        qry = model.Command.all()
+        if by:
+            by = blixt.appengine.db.get_id_or_name(by, User)
+            qry.filter('user_name', by)
+        
+        commands = qry.fetch(1000)
+
+        result = []
+        for command in commands:
+            result.append(self.get_command(command))
+
+        return result
+
     def get_first_frame(self):
         return self.get_frame(FIRST_FRAME_ID)
 
@@ -106,8 +120,13 @@ class MultifarceController(object):
                   'title': frame.title, 'text': frame.text}
         return result
 
-    def get_frames(self):
-        frames = model.Frame.all().fetch(1000)
+    def get_frames(self, by=None):
+        qry = model.Frame.all()
+        if by:
+            by = blixt.appengine.db.get_id_or_name(by, User)
+            qry.filter('user_name', by)
+        
+        frames = qry.fetch(1000)
 
         result = []
         for frame in frames:
@@ -146,6 +165,14 @@ class MultifarceController(object):
             result['logged_in'] = False
 
         return result
+
+    def get_top_commands(self, frame):
+        """Returns the most entered commands for the specified frame.
+        """
+        commands = []
+        for command in model.CommandUsage.get_top(frame):
+            commands.append({'text': command.text, 'count': command.count})
+        return commands
 
     def get_user_info(self, user):
         """Returns information about the specified user. Fails if the user does

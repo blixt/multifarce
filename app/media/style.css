@@ -265,6 +265,26 @@ body, button, input {
     font: 12pt/1.3 "Trebuchet MS", sans-serif;
 }
 
+/*
+ * dom-loading
+ * Class that is removed once the DOM has loaded. This is so that CSS can be
+ * used to visually hide elements that will be removed by the JavaScript code
+ * later on.
+ */
+body.dom-loading #home-page {
+    display: block;
+}
+
+body.dom-loading div.page {
+    display: none;
+}
+
+body.loading #action {
+    background-image: url(loading2.gif);
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+}
+
 body.loading h1 {
     background: url(loading.gif) no-repeat 130px 50%;
 }
