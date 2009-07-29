@@ -88,8 +88,19 @@ game.listen('frame-load', function (data) {
 
 // Handle execution errors.
 game.listen('execute-error', function (error) {
-    // Show a notification.
-    notify(error.message, 'error');
+    // Handle special case for when a command cannot be found.
+    if (error.code == 'COMMAND_NOT_FOUND') {
+        notify(
+            'The command "' + error.data + '" does not exist yet! Click here ' +
+            'to create it!', 'hint',
+            function () {
+                $.hash.go('commands/new?frame=' + game.get_frameId() +
+                          '&command=' + error.data.replace(/ /g, '+'));
+            });
+    } else {
+        // Show a notification.
+        notify(error.message, 'error');
+    }
 
     // Add an entry to the log.
     log.prepend(

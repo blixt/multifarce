@@ -1,5 +1,9 @@
 // Create an API object. Inherits ServiceClient functionality (see bottom.)
 var api = {
+    clean: function (command) {
+        this.simpleCall('clean', {command: command});
+    },
+
     createCommand: function (frameId, commands, text, goToFrameId, flagsOn,
                              flagsOff, flagsRequired)
     {

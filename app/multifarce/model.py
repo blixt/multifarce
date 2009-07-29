@@ -32,6 +32,19 @@ class Command(db.Model):
         """Cleans command/flag names. Makes the name lower case, removes
         non-alpha characters and extraneous whitespace.
         """
+        if isinstance(command, list):
+            commands = []
+            for single in command:
+                if not isinstance(single, basestring):
+                    raise multifarce.CreateCommandError(
+                        'Invalid type (item of command); expected string.',
+                        'TYPE_ERROR')
+
+                single = Command.clean(single)
+                if single and single not in commands:
+                    commands.append(single)
+            return commands
+
         # Transliterate international characters.
         if not isinstance(command, unicode):
             command = unicode(command, 'UTF-8')
@@ -77,6 +90,11 @@ class Command(db.Model):
                 'Invalid type (text); expected string.',
                 'TYPE_ERROR')
 
+        if not text:
+            raise multifarce.CreateCommandError(
+                'A text for the command must be specified.',
+                'TEXT_MISSING')
+
         # Validate frame.
         frame = blixt.appengine.db.get_id_or_name(frame, Frame)
         if not frame:
@@ -95,17 +113,19 @@ class Command(db.Model):
                 'MAX_COMMANDS_FRAME')
 
         # Validate synonyms.
-        synonyms = []
+        commands = Command.clean(commands)
+        if len(commands) == 0:
+            raise multifarce.CreateCommandError(
+                'At least one command must be specified.',
+                'COMMAND_MISSING')
+        
+        if len(commands) > 5:
+            raise multifarce.CreateCommandError(
+                'There can only be a maximum of 5 synonyms for a single '
+                'command.',
+                'TOO_MANY_COMMANDS')
+
         for c in commands:
-            if not c: continue
-
-            if not isinstance(c, basestring):
-                raise multifarce.CreateCommandError(
-                    'Invalid type (item of commands); expected string.',
-                    'TYPE_ERROR')
-
-            c = Command.clean(c)
-
             if len(c) < 3:
                 raise multifarce.CreateCommandError(
                     'Command must be at least three characters long.',
@@ -115,12 +135,13 @@ class Command(db.Model):
                     'Command must not be any longer than 20 characters.',
                     'COMMAND_TOO_LONG')
 
-            synonyms.append(c)
-            if len(synonyms) > 5:
+            qry = Command.all(keys_only=True)
+            qry.filter('frame_id', frame)
+            qry.filter('synonyms', c)
+            if qry.get():
                 raise multifarce.CreateCommandError(
-                    'There can only be a maximum of 5 synonyms for a single '
-                    'command.',
-                    'TOO_MANY_COMMANDS')
+                    'Command "%s" already exists for that frame.' % c,
+                    'COMMAND_IN_USE')
 
         # Validate go-to frame.
         if go_to_frame != None:
@@ -139,7 +160,7 @@ class Command(db.Model):
         # TODO: Validate flags variables.
 
         # Create and store command.
-        cmd = Command(user_name=user, frame_id=frame, synonyms=synonyms,
+        cmd = Command(user_name=user, frame_id=frame, synonyms=commands,
                       text=text, go_to_frame_id=go_to_frame,
                       flags_on=flags_on, flags_off=flags_off,
                       flags_required=flags_required)
@@ -153,7 +174,11 @@ class Command(db.Model):
         if not frame:
             raise FindCommandError('The specified frame does not exist.',
                                    'FRAME_NOT_FOUND')
+
         command = Command.clean(command)
+        if not command:
+            return None
+
         CommandUsage.increment(frame, command)
         return Command.gql('WHERE frame_id = :frame AND synonyms = :synonyms',
                            frame=frame, synonyms=command).get()

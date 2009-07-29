@@ -15,6 +15,10 @@ from multifarce import model
 FIRST_FRAME_ID = 1
 
 class MultifarceController(object):
+    def clean(self, command):
+        """Cleans a single command or a list of commands."""
+        return model.Command.clean(command)
+
     def create_command(self, frame, commands, text, go_to_frame=None,
                        flags_on=[], flags_off=[], flags_required=[]):
         """Creates a new command for the specified frame.
@@ -47,32 +51,33 @@ class MultifarceController(object):
     def execute(self, frame, command, flags=None):
         """Executes a command for the specified frame.
         """
-        command = model.Command.find(frame, command)
-        if not command:
+        cmd = model.Command.find(frame, command)
+        if not cmd:
             raise multifarce.ExecuteError('You can\'t do that.',
-                                          'COMMAND_NOT_FOUND')
+                                          'COMMAND_NOT_FOUND',
+                                          model.Command.clean(command))
 
         if not isinstance(flags, list):
             flags = []
 
-        for flag in command.flags_required:
+        for flag in cmd.flags_required:
             if flag not in flags:
                 raise multifarce.ExecuteError(
                     'You can\'t do that right now.' % flag, 'FLAG_REQUIRED')
 
-        for flag in command.flags_on:
+        for flag in cmd.flags_on:
             if flag not in flags:
                 flags.append(flag)
 
-        for flag in command.flags_off:
+        for flag in cmd.flags_off:
             flags.remove(flag)
 
-        result = {'command_id': command.key().id(),
-                  'frame_id': command.frame_id, 'text': command.text,
+        result = {'command_id': cmd.key().id(),
+                  'frame_id': cmd.frame_id, 'text': cmd.text,
                   'flags': flags}
 
-        if command.go_to_frame_id:
-            result['frame_id'] = command.go_to_frame_id
+        if cmd.go_to_frame_id:
+            result['frame_id'] = cmd.go_to_frame_id
 
         return result
 

@@ -14,7 +14,7 @@ import waveapi.model
 import waveapi.robot
 
 INIT_FRAME_ID = 1
-NEW_COMMAND = 'http://beta.multifarce.com/#commands/new?frame_id=%d'
+NEW_COMMAND = 'http://beta.multifarce.com/#commands/new?frame=%d&command=%s'
 HINTS = ['A text-adventure bot!',
          'YOU can continue the story! http://beta.multifarce.com/',
          'Reply with a command to play!',
@@ -135,8 +135,9 @@ class MultifarceBot(object):
                 rng = blixt.wave.append_text(document, 'create the command')
                 document.AppendText(' yourself!')
 
-                document.SetAnnotation(rng, 'link/manual',
-                                       NEW_COMMAND % frame_id)
+                document.SetAnnotation(
+                    rng, 'link/manual',
+                    NEW_COMMAND % (frame_id, e.data.replace(' ', '+')))
             else:
                 document.AppendText(e.message)
 

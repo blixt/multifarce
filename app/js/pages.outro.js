@@ -3,6 +3,7 @@ var site = new Application([
     ['^$', HomeHandler],
     //['^commands/(\d+)$', CommandHandler],
     ['^commands/new$', NewCommandHandler],
+    ['^create$', CreateHandler],
     //['^frames/(\d+)$', FrameHandler],
     ['^frames/new$', NewFrameHandler],
     ['^log-in$', LogInHandler],

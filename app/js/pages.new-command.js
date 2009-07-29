@@ -9,32 +9,53 @@ command2 = page.find('#new-command-2'),
 command3 = page.find('#new-command-3'),
 command4 = page.find('#new-command-4'),
 command5 = page.find('#new-command-5'),
+cleanCommands = page.find('#new-command-clean'),
 text = page.find('#new-command-text'),
 goToFrame = page.find('#new-command-go-to-frame'),
 go = page.find('#new-command-go');
 
 // Set up events.
 $('#new-command-go').live('click', function () {
-    var commands = [];
+    var commands = [command1.val(), command2.val(), command3.val(),
+                    command4.val(), command5.val()];
     
-    if (command1.val()) commands.push(command1.val());
-    if (command2.val()) commands.push(command2.val());
-    if (command3.val()) commands.push(command3.val());
-    if (command4.val()) commands.push(command4.val());
-    if (command5.val()) commands.push(command5.val());
+    var frameId = parseInt(frame.val(), 10);
+    var goToFrameId = parseInt(goToFrame.val(), 10);
+    if (goToFrameId <= 0) goToFrameId = null;
     
-    api.success(function(){alert('Success!')}).createCommand(
-        parseInt(frame.val(), 10),
-        commands,
-        text.val(),
-        parseInt(goToFrame.val(), 10));
+    api.success(function (command) {
+        notify('The command has been successfully created!', 'success');
+        $.hash.go('commands/' + command.id);
+    });
+    api.createCommand(frameId, commands, text.val(), goToFrameId);
+});
+
+$('#new-command-clean').live('click', function () {
+    api.success(function (commands) {
+        command1.val(commands[0] || '');
+        command2.val(commands[1] || '');
+        command3.val(commands[2] || '');
+        command4.val(commands[3] || '');
+        command5.val(commands[4] || '');
+    });
+    api.clean([command1.val(), command2.val(), command3.val(), command4.val(),
+               command5.val()]);
+
+    return false;
 });
 
 NewCommandHandler = Application.handler(function () {
     frame.empty();
     goToFrame.empty();
-    
+    command1.val(this.get_param('command', ''));
+    command2.val('');
+    command3.val('');
+    command4.val('');
+    command5.val('');
+    text.val('');
+
     api.success(function (frames) {
+        goToFrame.append('<option value="-1">(No frame)</option>');
         for (var i = 0; i < frames.length; i++) {
             frame.append(
                 $('<option/>')
@@ -45,9 +66,12 @@ NewCommandHandler = Application.handler(function () {
                     .val(frames[i].id)
                     .text(frames[i].title));
         }
-    }).getFrames();
+        
+        frame.val(this.get_param('frame', ''));
+    }, this).getFrames();
 
-    setPage('Creating new command', page);
+    setPage('Creating new command', page,
+        'You will need to log in before you can create a command!', this);
 });
 
 })();

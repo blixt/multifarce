@@ -31,14 +31,31 @@
  *     app.exec('user/bob/articles?page=2');
  *     // Handler UserHandler will be found (because the pattern matches), and
  *     // then be used like this:
- *     // var handler = new UserHandler(app, 'user/bob/articles',
+ *     // var handler = new UserHandler(app, 'user/bob/articles?page=2',
+ *     //                               'user/bob/articles',
  *     //                               ['bob', 'articles'], {page: '2'});
  *     // handler.run('bob', 'articles');
  */
 
 var Application = (function () {
+    // Private static members.
+    var
+    decodeRegex = /\.([A-F0-9]{2})/g,
+    decodeReplace = function (match, code) {
+        return String.fromCharCode(parseInt(code, 16));
+    },
+    
+    encodeRegex = /[^A-Za-z0-9,_!~*'()-]/g,
+    encodeReplace = function (chr) {
+        var code = chr.charCodeAt(0);
+        if (code > 255)
+            return '';
+        else
+            return (code < 16 ? '.0' : '.') + code.toString(16).toUpperCase();
+    },
+
     // Constructor.
-    var cls = function (map) {
+    cls = function (map) {
         // Private members.
         var
         patterns = [],
@@ -61,23 +78,25 @@ var Application = (function () {
         }
 
         // Executes the appropriate handler for the given path.
-        this.exec = function (path) {
-            var matches, handler, params = {}, pieces, pair, i, l;
+        this.exec = function (requestPath) {
+            var path, matches, handler, params = {}, pieces, pair, i, l;
 
             // Extract query string from path and parse it.
-            if ((i = path.indexOf('?')) >= 0) {
+            if ((i = requestPath.indexOf('?')) >= 0) {
                 // Get query string pieces (separated by &)
-                pieces = path.substr(i + 1).split('&');
+                pieces = requestPath.substr(i + 1).split('&');
                 // Set new path to everything before ?
-                path = path.substr(0, i);
+                path = requestPath.substr(0, i);
                 
                 for (i = 0, l = pieces.length; i < l; i++) {
                     pair = pieces[i].split('=', 2);
                     // Repeated parameters with the same name are overwritten.
                     // Parameters with no value get set to boolean true.
-                    params[decodeURIComponent(pair[0])] = (pair.length == 2 ?
-                        decodeURIComponent(pair[1].replace(/\+/g, ' ')) : true);
+                    params[cls.decode(pair[0])] = (pair.length == 2 ?
+                        cls.decode(pair[1].replace(/\+/g, ' ')) : true);
                 }
+            } else {
+                path = requestPath;
             }
 
             // Find a handler for the current path.
@@ -86,7 +105,8 @@ var Application = (function () {
                 if (matches) {
                     // Current path matches a handler.
                     matches = matches.slice(1);
-                    handler = new handlers[i](this, path, matches, params);
+                    handler = new handlers[i](
+                        this, requestPath, path, matches, params);
                     handler.run.apply(handler, matches);
                     return;
                 }
@@ -98,10 +118,21 @@ var Application = (function () {
     
     // Static public members.
 
+    // The decode/encode functions act the same as {decode|encode}URIComponent,
+    // except that they use . instead of % as the encoding character (to prevent
+    // browsers automatically decoding an encoded hash, resulting in double
+    // requests, the latter with erroneous data.
+    cls.decode = function (value) {
+        return value.replace(decodeRegex, decodeReplace);
+    },
+    cls.encode = function (value) {
+        return value.replace(encodeRegex, encodeReplace);
+    },
+
     // Creates a new handler class. Takes the function that will be called when
     // the handler is to be executed as an argument.
     cls.handler = function (runFunction) {
-        var handler = function (app, path, matches, params) {
+        var handler = function (app, requestPath, path, matches, params) {
             // Return the value of a single query string parameter, or the
             // specified default value if the parameter does not exist.
             this.get_param = function (key, def) {
@@ -123,9 +154,14 @@ var Application = (function () {
                 return all;
             };
 
-            // Return the requested path.
+            // Return the path used.
             this.get_path = function () {
                 return path;
+            };
+            
+            // Return the requested path (including query string.)
+            this.get_requestPath = function () {
+                return requestPath;
             };
             
             // Get the application that created this handler.

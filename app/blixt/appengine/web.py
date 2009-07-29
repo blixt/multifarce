@@ -41,6 +41,8 @@ class JsonService(webapp.RequestHandler):
 
                 if hasattr(e, 'code'):
                     res['code'] = e.code
+                if hasattr(e, 'data'):
+                    res['data'] = e.data
 
                 out['status'] = 'error'
                 out['response'] = res

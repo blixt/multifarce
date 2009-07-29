@@ -9,7 +9,7 @@ action1 = $('#action-1 a'),
 action2 = $('#action-2 a'),
 
 // Make functions defined in the function below available in the current scope.
-getPage, setPage, notify;
+getPage, setPage, notify, requireLogin;
 
 // Put the following code in its own scope to avoid name collisions.
 (function () {
@@ -32,7 +32,27 @@ getPage, setPage, notify;
     };
 
     // Helper function for setting which page to show.
-    setPage = function (title, which) {
+    setPage = function (title, which, requireLogin, handler) {
+        var loggedIn = currentUser.loggedIn();
+        if (requireLogin && !loggedIn) {
+            if (loggedIn === false) {
+                // Show notice and redirect to login page if the user is
+                // definitely not logged in.
+                if (typeof requireLogin == 'string')
+                    notify(requireLogin, 'hint');
+                $.hash.go('log-in?continue=' + Application.encode(
+                    handler.get_requestPath()).replace(/ /g, '+'));
+            } else {
+                // Login info has not been retrieved yet; delay the function for
+                // a while.
+                setTimeout(function () {
+                    setPage(title, which, requireLogin, handler);
+                }, 50);
+            }
+
+            return;
+        }
+    
         if (title) {
             pageName.text(title);
             document.title = title + ' - ' + APP_TITLE;
@@ -45,7 +65,7 @@ getPage, setPage, notify;
     };
 
     // Helper function for showing a notification.
-    notify = function (text, type) {
+    notify = function (text, type, click) {
         notifications.empty();
         notifications.append(
             $('<p/>')
@@ -55,6 +75,7 @@ getPage, setPage, notify;
                         .click(
                             function () {
                                 $(this).closest('p').remove();
+                                if (click) click();
                                 return false;
                             })
                         .text(text)

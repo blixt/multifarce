@@ -573,14 +573,31 @@ jQuery.fn[eventName] = function (fn) {
  *     app.exec('user/bob/articles?page=2');
  *     // Handler UserHandler will be found (because the pattern matches), and
  *     // then be used like this:
- *     // var handler = new UserHandler(app, 'user/bob/articles',
+ *     // var handler = new UserHandler(app, 'user/bob/articles?page=2',
+ *     //                               'user/bob/articles',
  *     //                               ['bob', 'articles'], {page: '2'});
  *     // handler.run('bob', 'articles');
  */
 
 var Application = (function () {
+    // Private static members.
+    var
+    decodeRegex = /\.([A-F0-9]{2})/g,
+    decodeReplace = function (match, code) {
+        return String.fromCharCode(parseInt(code, 16));
+    },
+    
+    encodeRegex = /[^A-Za-z0-9,_!~*'()-]/g,
+    encodeReplace = function (chr) {
+        var code = chr.charCodeAt(0);
+        if (code > 255)
+            return '';
+        else
+            return (code < 16 ? '.0' : '.') + code.toString(16).toUpperCase();
+    },
+
     // Constructor.
-    var cls = function (map) {
+    cls = function (map) {
         // Private members.
         var
         patterns = [],
@@ -603,23 +620,25 @@ var Application = (function () {
         }
 
         // Executes the appropriate handler for the given path.
-        this.exec = function (path) {
-            var matches, handler, params = {}, pieces, pair, i, l;
+        this.exec = function (requestPath) {
+            var path, matches, handler, params = {}, pieces, pair, i, l;
 
             // Extract query string from path and parse it.
-            if ((i = path.indexOf('?')) >= 0) {
+            if ((i = requestPath.indexOf('?')) >= 0) {
                 // Get query string pieces (separated by &)
-                pieces = path.substr(i + 1).split('&');
+                pieces = requestPath.substr(i + 1).split('&');
                 // Set new path to everything before ?
-                path = path.substr(0, i);
+                path = requestPath.substr(0, i);
                 
                 for (i = 0, l = pieces.length; i < l; i++) {
                     pair = pieces[i].split('=', 2);
                     // Repeated parameters with the same name are overwritten.
                     // Parameters with no value get set to boolean true.
-                    params[decodeURIComponent(pair[0])] = (pair.length == 2 ?
-                        decodeURIComponent(pair[1].replace(/\+/g, ' ')) : true);
+                    params[cls.decode(pair[0])] = (pair.length == 2 ?
+                        cls.decode(pair[1].replace(/\+/g, ' ')) : true);
                 }
+            } else {
+                path = requestPath;
             }
 
             // Find a handler for the current path.
@@ -628,7 +647,8 @@ var Application = (function () {
                 if (matches) {
                     // Current path matches a handler.
                     matches = matches.slice(1);
-                    handler = new handlers[i](this, path, matches, params);
+                    handler = new handlers[i](
+                        this, requestPath, path, matches, params);
                     handler.run.apply(handler, matches);
                     return;
                 }
@@ -640,10 +660,21 @@ var Application = (function () {
     
     // Static public members.
 
+    // The decode/encode functions act the same as {decode|encode}URIComponent,
+    // except that they use . instead of % as the encoding character (to prevent
+    // browsers automatically decoding an encoded hash, resulting in double
+    // requests, the latter with erroneous data.
+    cls.decode = function (value) {
+        return value.replace(decodeRegex, decodeReplace);
+    },
+    cls.encode = function (value) {
+        return value.replace(encodeRegex, encodeReplace);
+    },
+
     // Creates a new handler class. Takes the function that will be called when
     // the handler is to be executed as an argument.
     cls.handler = function (runFunction) {
-        var handler = function (app, path, matches, params) {
+        var handler = function (app, requestPath, path, matches, params) {
             // Return the value of a single query string parameter, or the
             // specified default value if the parameter does not exist.
             this.get_param = function (key, def) {
@@ -665,9 +696,14 @@ var Application = (function () {
                 return all;
             };
 
-            // Return the requested path.
+            // Return the path used.
             this.get_path = function () {
                 return path;
+            };
+            
+            // Return the requested path (including query string.)
+            this.get_requestPath = function () {
+                return requestPath;
             };
             
             // Get the application that created this handler.
@@ -798,6 +834,10 @@ APP_TITLE = 'multifarce',
 API_PATH = '/api/';
 // Create an API object. Inherits ServiceClient functionality (see bottom.)
 var api = {
+    clean: function (command) {
+        this.simpleCall('clean', {command: command});
+    },
+
     createCommand: function (frameId, commands, text, goToFrameId, flagsOn,
                              flagsOff, flagsRequired)
     {
@@ -1006,7 +1046,7 @@ var User = (function () {
         EventSource.call(this, 'load');
         
         // Private members.
-        var loaded = false, data,
+        var loaded = false, data = {},
 
         error = function () {
             this.clearHandlers();
@@ -1079,14 +1119,17 @@ var User = (function () {
         }
     };
     
-    cls.logIn = function (username, password) {
+    cls.logIn = function (username, password, success, error) {
         var cur = cls.current();
         
         if (cur.loggedIn()) return;
         
         api.success(function (user) {
             cur.load(user);
+            if (success) success(user);
         });
+
+        if (error) api.error(error);
 
         api.logIn(username, password);
     };
@@ -1122,7 +1165,7 @@ action1 = $('#action-1 a'),
 action2 = $('#action-2 a'),
 
 // Make functions defined in the function below available in the current scope.
-getPage, setPage, notify;
+getPage, setPage, notify, requireLogin;
 
 // Put the following code in its own scope to avoid name collisions.
 (function () {
@@ -1145,7 +1188,27 @@ getPage, setPage, notify;
     };
 
     // Helper function for setting which page to show.
-    setPage = function (title, which) {
+    setPage = function (title, which, requireLogin, handler) {
+        var loggedIn = currentUser.loggedIn();
+        if (requireLogin && !loggedIn) {
+            if (loggedIn === false) {
+                // Show notice and redirect to login page if the user is
+                // definitely not logged in.
+                if (typeof requireLogin == 'string')
+                    notify(requireLogin, 'hint');
+                $.hash.go('log-in?continue=' + Application.encode(
+                    handler.get_requestPath()).replace(/ /g, '+'));
+            } else {
+                // Login info has not been retrieved yet; delay the function for
+                // a while.
+                setTimeout(function () {
+                    setPage(title, which, requireLogin, handler);
+                }, 50);
+            }
+
+            return;
+        }
+    
         if (title) {
             pageName.text(title);
             document.title = title + ' - ' + APP_TITLE;
@@ -1158,7 +1221,7 @@ getPage, setPage, notify;
     };
 
     // Helper function for showing a notification.
-    notify = function (text, type) {
+    notify = function (text, type, click) {
         notifications.empty();
         notifications.append(
             $('<p/>')
@@ -1168,6 +1231,7 @@ getPage, setPage, notify;
                         .click(
                             function () {
                                 $(this).closest('p').remove();
+                                if (click) click();
                                 return false;
                             })
                         .text(text)
@@ -1200,6 +1264,18 @@ api.set_errorHandler(function (error) {
 
 // Get current user.
 var currentUser = User.current();
+
+var CreateHandler;
+(function () {
+
+var
+page = allPages.filter('#create-page');
+
+CreateHandler = Application.handler(function () {
+    setPage('Create', page);
+});
+
+})();
 
 var HomeHandler;
 (function () {
@@ -1291,8 +1367,19 @@ game.listen('frame-load', function (data) {
 
 // Handle execution errors.
 game.listen('execute-error', function (error) {
-    // Show a notification.
-    notify(error.message, 'error');
+    // Handle special case for when a command cannot be found.
+    if (error.code == 'COMMAND_NOT_FOUND') {
+        notify(
+            'The command "' + error.data + '" does not exist yet! Click here ' +
+            'to create it!', 'hint',
+            function () {
+                $.hash.go('commands/new?frame=' + game.get_frameId() +
+                          '&command=' + error.data.replace(/ /g, '+'));
+            });
+    } else {
+        // Show a notification.
+        notify(error.message, 'error');
+    }
 
     // Add an entry to the log.
     log.prepend(
@@ -1339,16 +1426,36 @@ var
 page = allPages.filter('#log-in-page'),
 username = page.find('#log-in-username'),
 password = page.find('#log-in-password'),
-go = page.find('#log-in-go');
+go = page.find('#log-in-go'),
+
+nextPath = '',
+greetings = [
+    'Hi {name}!',
+    'Howdy {name}!',
+    'Hello {name}!',
+    'Yo {name}!',
+    'G\'day {name}!',
+    '¡Hola {name}!',
+    'Salut {name}!',
+    'Konnichiwa {name}!',
+    'Ciao {name}!'];
 
 // Set up events.
 $('#log-in-go').live('click', function () {
-    User.logIn(username.val(), password.val());
-    username.val('');
+    User.logIn(username.val(), password.val(), function (user) {
+        var i = Math.floor(Math.random() * greetings.length);
+        notify(greetings[i].replace('{name}', user.display_name), 'success');
+        $.hash.go(nextPath);
+    });
     password.val('');
 });
 
 LogInHandler = Application.handler(function () {
+    nextPath = this.get_param('continue', '');
+
+    username.val('');
+    password.val('');
+
     setPage('Log in', page);
 });
 
@@ -1379,32 +1486,53 @@ command2 = page.find('#new-command-2'),
 command3 = page.find('#new-command-3'),
 command4 = page.find('#new-command-4'),
 command5 = page.find('#new-command-5'),
+cleanCommands = page.find('#new-command-clean'),
 text = page.find('#new-command-text'),
 goToFrame = page.find('#new-command-go-to-frame'),
 go = page.find('#new-command-go');
 
 // Set up events.
 $('#new-command-go').live('click', function () {
-    var commands = [];
+    var commands = [command1.val(), command2.val(), command3.val(),
+                    command4.val(), command5.val()];
     
-    if (command1.val()) commands.push(command1.val());
-    if (command2.val()) commands.push(command2.val());
-    if (command3.val()) commands.push(command3.val());
-    if (command4.val()) commands.push(command4.val());
-    if (command5.val()) commands.push(command5.val());
+    var frameId = parseInt(frame.val(), 10);
+    var goToFrameId = parseInt(goToFrame.val(), 10);
+    if (goToFrameId <= 0) goToFrameId = null;
     
-    api.success(function(){alert('Success!')}).createCommand(
-        parseInt(frame.val(), 10),
-        commands,
-        text.val(),
-        parseInt(goToFrame.val(), 10));
+    api.success(function (command) {
+        notify('The command has been successfully created!', 'success');
+        $.hash.go('commands/' + command.id);
+    });
+    api.createCommand(frameId, commands, text.val(), goToFrameId);
+});
+
+$('#new-command-clean').live('click', function () {
+    api.success(function (commands) {
+        command1.val(commands[0] || '');
+        command2.val(commands[1] || '');
+        command3.val(commands[2] || '');
+        command4.val(commands[3] || '');
+        command5.val(commands[4] || '');
+    });
+    api.clean([command1.val(), command2.val(), command3.val(), command4.val(),
+               command5.val()]);
+
+    return false;
 });
 
 NewCommandHandler = Application.handler(function () {
     frame.empty();
     goToFrame.empty();
-    
+    command1.val(this.get_param('command', ''));
+    command2.val('');
+    command3.val('');
+    command4.val('');
+    command5.val('');
+    text.val('');
+
     api.success(function (frames) {
+        goToFrame.append('<option value="-1">(No frame)</option>');
         for (var i = 0; i < frames.length; i++) {
             frame.append(
                 $('<option/>')
@@ -1415,9 +1543,12 @@ NewCommandHandler = Application.handler(function () {
                     .val(frames[i].id)
                     .text(frames[i].title));
         }
-    }).getFrames();
+        
+        frame.val(this.get_param('frame', ''));
+    }, this).getFrames();
 
-    setPage('Creating new command', page);
+    setPage('Creating new command', page,
+        'You will need to log in before you can create a command!', this);
 });
 
 })();
@@ -1433,14 +1564,19 @@ go = page.find('#new-frame-go');
 
 // Set up events.
 $('#new-frame-go').live('click', function () {
-    api.success(function(){alert('Success!')}).createFrame(
-        title.val(),
-        text.val()
-    );
+    api.success(function (frame) {
+        notify('The frame has been successfully created!', 'success');
+        $.hash.go('frames/' + frame.id);
+    });
+    api.createFrame(title.val(), text.val());
 });
 
 NewFrameHandler = Application.handler(function () {
-    setPage('Creating new frame', page);
+    title.val('');
+    text.val('');
+
+    setPage('Creating new frame', page,
+        'You will need to log in before you can create a frame!', this);
 });
 
 })();
@@ -1515,6 +1651,14 @@ $('#register-page input[name=register-use-google]').live('click', function () {
 });
 
 RegisterHandler = Application.handler(function () {
+    username.val('');
+    displayName.val('');
+    email.val(
+        currentUser.googleLoggedIn() ? currentUser.get_googleEmail() : '');
+    password.val('');
+    passwordRepeat.val('');
+    useGoogle.val('no');
+
     setPage('Register', page);
 });
 
@@ -1525,6 +1669,7 @@ var site = new Application([
     ['^$', HomeHandler],
     //['^commands/(\d+)$', CommandHandler],
     ['^commands/new$', NewCommandHandler],
+    ['^create$', CreateHandler],
     //['^frames/(\d+)$', FrameHandler],
     ['^frames/new$', NewFrameHandler],
     ['^log-in$', LogInHandler],

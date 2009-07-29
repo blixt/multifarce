@@ -203,20 +203,27 @@ textarea
     background: #b33;
 }
 
-#notifications p.error a:hover {
-    background: #c00;
+#notifications p.hint a {
+    background: #37c;
 }
 
 #notifications p.success a {
     background: #8a6;
 }
 
-#notifications p.success a:hover {
-    background: #5b3;
+#notifications p a span.close {
+    display: none;
+}
+
+#notifications p a:hover span.close {
+    display: block;
 }
 
 #notifications span.close {
     float: right;
+    font-size: 140%;
+    line-height: .9;
+    padding: 0 2px;
 }
 
 #page-name {

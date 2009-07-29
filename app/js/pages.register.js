@@ -54,6 +54,14 @@ $('#register-page input[name=register-use-google]').live('click', function () {
 });
 
 RegisterHandler = Application.handler(function () {
+    username.val('');
+    displayName.val('');
+    email.val(
+        currentUser.googleLoggedIn() ? currentUser.get_googleEmail() : '');
+    password.val('');
+    passwordRepeat.val('');
+    useGoogle.val('no');
+
     setPage('Register', page);
 });
 

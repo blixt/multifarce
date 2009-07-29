@@ -55,6 +55,144 @@
     <div id="log"></div>
   </div>
 
+  <div class="page" id="create-page">
+    <h3>Create!</h3>
+  </div>
+
+  <div class="page" id="log-in-page">
+    <div class="multifarce">
+      <div class="info">
+        <h3>Heeey, wait a minute!</h3>
+        <p>You're already logged in to multifarce! You'll need to
+        <a href="#log-out">log out</a> first before you can log in again!</p>
+      </div>
+    </div>
+    <div class="not-google not-multifarce">
+      <div class="info">
+        <h3>Psssst! Do you Google?</h3>
+        <p>Have you linked a Google Account to multifarce?<br />&mdash;
+        <a class="google-accounts" href="#">Yup! Take me to the Google log in
+        page!</a></p>
+        <p>If you want to register, you should head on over to
+        <a href="#register">the registration page</a>!</p>
+      </div>
+    </div>
+    <div class="google not-multifarce">
+      <div class="info">
+        <h3>Ahoy there, Googler!</h3>
+        <p>So you're logged in with your Google account, but you haven't linked
+        it to multifarce yet! Well, we'll sort that out in no time! Head on over
+        to <a href="#register">the registration page</a>!</p>
+      </div>
+    </div>
+    <h3>Ye olde login</h3>
+    <p class="field">
+      <label for="log-in-username">Username</label>
+      <input class="text" id="log-in-username" type="text" />
+    </p>
+    <p class="field">
+      <label for="log-in-password">Password</label>
+      <input class="password" id="log-in-password" type="password" />
+    </p>
+    <p class="field"><button id="log-in-go">Log me in, Scotty!</button></p>
+  </div>
+
+  <div class="page" id="log-out-page">
+    <div class="multifarce">
+      <div class="info">
+        <h3>Logging out!</h3>
+        <p>You are being logged out!</p>
+      </div>
+    </div>
+    <div class="not-multifarce">
+      <div class="info">
+        <h3>Logged out!</h3>
+        <p>You are logged out!</p>
+        <p><a href="#">Okay, go back to the home page!</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="new-command-page"> 
+    <h3>Creating a new command</h3>
+    <p class="field">
+      <label for="new-command-frame">On frame</label>
+      <select id="new-command-frame">
+        <option>Loading!</option>
+      </select>
+    </p>
+    <p class="field">
+      <label for="new-command-1">Command #1</label>
+      <input class="text" id="new-command-1" type="text" />
+    </p>
+    <p class="field">
+      <label for="new-command-2">Command #2</label>
+      <input class="text" id="new-command-2" type="text" />
+    </p>
+    <p class="field">
+      <label for="new-command-3">Command #3</label>
+      <input class="text" id="new-command-3" type="text" />
+    </p>
+    <p class="field">
+      <label for="new-command-4">Command #4</label>
+      <input class="text" id="new-command-4" type="text" />
+    </p>
+    <p class="field">
+      <label for="new-command-5">Command #5</label>
+      <input class="text" id="new-command-5" type="text" />
+    </p>
+    <p class="field">
+      <span><a href="#clean" id="new-command-clean">Clean commands</a> &ndash;
+      The commands are internally modified so that they match as well as
+      possible. For example, special characters are removed, and certain
+      common words such as "the", "a" and "an". Certain words are replaced
+      with synonyms ("walk" &rarr; "go".) Clean the commands to see these
+      changes.</span>
+    </p>
+    <p class="field">
+      <span><strong>Note:</strong> You only need to enter one command; the
+      other command text boxes can be left blank.</span>
+    </p>
+    <p class="field">
+      <label for="new-command-text">Text</label>
+      <input class="text" id="new-command-text" type="text" />
+    </p>
+    <p class="field">
+      <span>This is a short text that will be shown to the user when your
+      command has been successfully executed.</span>
+    </p>
+    <p class="field">
+      <label for="new-command-go-to-frame">Go to frame</label>
+      <select id="new-command-go-to-frame">
+        <option>Loading!</option>
+      </select>
+    </p>
+    <p class="field"><button id="new-command-go">Create it!</button></p>
+  </div> 
+
+  <div class="page" id="new-frame-page"> 
+    <h3>Creating a new frame</h3>
+    <p class="field">
+      <label for="new-frame-title">Title</label>
+      <input class="text" id="new-frame-title" type="text" />
+    </p>
+    <p class="field">
+      <label for="new-frame-text">Text</label>
+      <span>You can use <code>*text*</code> for <strong>text you want to stand
+      out</strong> and <code>_text_</code> for <em>text you want to
+      emphasize</em>.</span>
+      <textarea id="new-frame-text" cols="50" rows="10"></textarea>
+    </p>
+    <p class="field"><button id="new-frame-go">Create it!</button></p>
+  </div> 
+
+  <div class="page" id="not-found-page"> 
+    <h3>Oh noes!</h3>
+    <p>The path <strong id="not-found-path">.</strong> don't lead nowhere! Try
+    hitting <em>Back</em> in your browser or going back to
+    <a href="#">the start</a>.</p> 
+  </div> 
+
   <div class="page" id="register-page">
     <div class="multifarce">
       <div class="info">
@@ -125,124 +263,6 @@
     </p>
     <p class="field"><button id="register-go">Sign me up!</button></p>
   </div>
-
-  <div class="page" id="log-in-page">
-    <div class="multifarce">
-      <div class="info">
-        <h3>Heeey, wait a minute!</h3>
-        <p>You're already logged in to multifarce! You'll need to
-        <a href="#log-out">log out</a> first before you can log in again!</p>
-      </div>
-    </div>
-    <div class="not-google not-multifarce">
-      <div class="info">
-        <h3>Psssst! Do you Google?</h3>
-        <p>Have you linked a Google Account to multifarce?<br />&mdash;
-        <a class="google-accounts" href="#">Yup! Take me to the Google log in
-        page!</a></p>
-        <p>If you want to register, you should head on over to
-        <a href="#register">the registration page</a>!</p>
-      </div>
-    </div>
-    <div class="google not-multifarce">
-      <div class="info">
-        <h3>Ahoy there, Googler!</h3>
-        <p>So you're logged in with your Google account, but you haven't linked
-        it to multifarce yet! Well, we'll sort that out in no time! Head on over
-        to <a href="#register">the registration page</a>!</p>
-      </div>
-    </div>
-    <h3>Ye olde login</h3>
-    <p class="field">
-      <label for="log-in-username">Username</label>
-      <input class="text" id="log-in-username" type="text" />
-    </p>
-    <p class="field">
-      <label for="log-in-password">Password</label>
-      <input class="password" id="log-in-password" type="password" />
-    </p>
-    <p class="field"><button id="log-in-go">Log me in, Scotty!</button></p>
-  </div>
-
-  <div class="page" id="log-out-page">
-    <div class="multifarce">
-      <div class="info">
-        <h3>Logging out!</h3>
-        <p>You are being logged out!</p>
-      </div>
-    </div>
-    <div class="not-multifarce">
-      <div class="info">
-        <h3>Logged out!</h3>
-        <p>You are logged out!</p>
-        <p><a href="#">Okay, go back to the home page!</a></p>
-      </div>
-    </div>
-  </div>
-
-  <div class="page" id="not-found-page"> 
-    <h3>Oh noes!</h3>
-    <p>The path <strong id="not-found-path">.</strong> don't lead nowhere! Try
-    hitting <em>Back</em> in your browser or going back to
-    <a href="#">the start</a>.</p> 
-  </div> 
-
-  <div class="page" id="new-command-page"> 
-    <h3>Creating a new command</h3>
-    <p class="field">
-      <label for="new-command-frame">On frame</label>
-      <select id="new-command-frame">
-        <option>Loading frames!</option>
-      </select>
-    </p>
-    <p class="field">
-      <label for="new-command-1">Command #1</label>
-      <input class="text" id="new-command-1" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-2">Command #2</label>
-      <input class="text" id="new-command-2" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-3">Command #3</label>
-      <input class="text" id="new-command-3" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-4">Command #4</label>
-      <input class="text" id="new-command-4" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-5">Command #5</label>
-      <input class="text" id="new-command-5" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-text">Text</label>
-      <input class="text" id="new-command-text" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-command-go-to-frame">Go to frame</label>
-      <select id="new-command-go-to-frame">
-        <option>Loading frames!</option>
-      </select>
-    </p>
-    <p class="field"><button id="new-command-go">Create it!</button></p>
-  </div> 
-
-  <div class="page" id="new-frame-page"> 
-    <h3>Creating a new frame</h3>
-    <p class="field">
-      <label for="new-frame-title">Title</label>
-      <input class="text" id="new-frame-title" type="text" />
-    </p>
-    <p class="field">
-      <label for="new-frame-text">Text</label>
-      <span>You can use <code>*text*</code> for <strong>text you want to stand
-      out</strong> and <code>_text_</code> for <em>text you want to
-      emphasize</em>.</span>
-      <textarea id="new-frame-text" cols="50" rows="10"></textarea>
-    </p>
-    <p class="field"><button id="new-frame-go">Create it!</button></p>
-  </div> 
 </div>
 <div id="footer">
   <p>Open source: <a href="http://code.google.com/p/multifarce/">Google Code

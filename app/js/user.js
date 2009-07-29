@@ -10,7 +10,7 @@ var User = (function () {
         EventSource.call(this, 'load');
         
         // Private members.
-        var loaded = false, data,
+        var loaded = false, data = {},
 
         error = function () {
             this.clearHandlers();
@@ -83,14 +83,17 @@ var User = (function () {
         }
     };
     
-    cls.logIn = function (username, password) {
+    cls.logIn = function (username, password, success, error) {
         var cur = cls.current();
         
         if (cur.loggedIn()) return;
         
         api.success(function (user) {
             cur.load(user);
+            if (success) success(user);
         });
+
+        if (error) api.error(error);
 
         api.logIn(username, password);
     };

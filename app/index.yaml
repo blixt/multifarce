@@ -10,14 +10,14 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 6 times in query history.
+# Used 36 times in query history.
 - kind: CommandUsage
   properties:
   - name: frame_id
   - name: count
     direction: desc
 
-# Used 114 times in query history.
+# Used 160 times in query history.
 - kind: User
   properties:
   - name: session

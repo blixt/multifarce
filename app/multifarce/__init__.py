@@ -27,9 +27,10 @@ STOP_WORDS = ['a', 'an', 'the']
 
 class Error(Exception):
     """Base of all exceptions in the multifarce package."""
-    def __init__(self, message, code=None):
+    def __init__(self, message, code=None, data=None):
         self.message = message
         self.code = code
+        self.data = data
 
     def __str__(self):
         return self.message
