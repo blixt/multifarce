@@ -1,5 +1,29 @@
 $(function () {
 
+// Add functionality to jQuery for easily linking to a frame/command that hasn't
+// been loaded yet.
+$.fn.command = function (id) {
+    var $this = this;
+
+    $this.hash('commands/' + id).text('[Command#' + id + ']');
+    api.success(function (command) {
+        $this.text(command.synonyms.join(', '));
+    }).getCommand(id);
+    
+    return $this;
+};
+
+$.fn.frame = function (id) {
+    var $this = this;
+
+    $this.hash('frames/' + id).text('[Frame#' + id + ']');
+    api.success(function (frame) {
+        $this.text(frame.title);
+    }).getFrame(id);
+
+    return $this;
+};
+
 var
 // Various elements used by other code.
 allPages = $('div.page'),
@@ -9,7 +33,7 @@ action1 = $('#action-1 a'),
 action2 = $('#action-2 a'),
 
 // Make functions defined in the function below available in the current scope.
-getPage, setPage, notify, requireLogin;
+getPage, setPage, notify;
 
 // Put the following code in its own scope to avoid name collisions.
 (function () {

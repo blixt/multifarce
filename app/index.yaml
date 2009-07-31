@@ -17,7 +17,7 @@ indexes:
   - name: count
     direction: desc
 
-# Used 160 times in query history.
+# Used 166 times in query history.
 - kind: User
   properties:
   - name: session

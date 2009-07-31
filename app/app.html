@@ -56,7 +56,27 @@
   </div>
 
   <div class="page" id="create-page">
-    <h3>Create!</h3>
+    <h3>New command suggestions</h3>
+    <p>Imagination dry? Maybe this list of commands can inspire you! It's a list
+    of commands that have been entered by players, but that do not exist yet.
+    </p>
+    <ul class="object-list" id="create-command-suggestions">
+      <li>Um yeah... This is going to work soon! Promise!</li>
+    </ul>
+
+    <h3>Your frames</h3>
+    <p>Frames created by you. You may also want to <a href="#frames/new">create
+    a new frame</a>!</p>
+    <ul class="object-list" id="create-frames">
+      <li>Please stand by...</li>
+    </ul>
+
+    <h3>Your commands</h3>
+    <p>Commands created by you. You may also want to
+    <a href="#commands/new">create a new command</a>!</p>
+    <ul class="object-list" id="create-commands">
+      <li>Please stand by...</li>
+    </ul>
   </div>
 
   <div class="page" id="log-in-page">
@@ -167,6 +187,11 @@
         <option>Loading!</option>
       </select>
     </p>
+    <p class="field"><span><a href="#frames/new">Create a new frame!</a> &ndash;
+    <strong>Warning!</strong> Going to the <em>Create frame</em> page will
+    discard your changes on this page! In the future, you'll be able to create
+    a new frame in combination with a new command.</span>
+    </p>
     <p class="field"><button id="new-command-go">Create it!</button></p>
   </div> 
 
@@ -230,7 +255,7 @@
         perfectly safe, Google only tells multifarce if you logged in OK and
         what your Google e-mail is. By linking your account to multifarce your
         password will be kept safe with Google.</p>
-        <p><a class="google-accounts" href="#register">Yup! Take me to the
+        <p><a class="google-accounts" href="#">Yup! Take me to the
         Google log in page!</a></p>
       </div>
     </div>

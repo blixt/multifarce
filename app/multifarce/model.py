@@ -14,7 +14,7 @@ import translitcodec
 import multifarce
 
 # TODO: This value will most likely be reputation controlled.
-MAX_COMMANDS_PER_FRAME_PER_USER = 5
+MAX_COMMANDS_PER_FRAME_PER_USER = 15
 MAX_IMAGE_SIZE = 650
 
 class Command(db.Model):

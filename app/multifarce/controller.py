@@ -100,7 +100,7 @@ class MultifarceController(object):
     def get_commands(self, by=None):
         qry = model.Command.all()
         if by:
-            by = blixt.appengine.db.get_id_or_name(by, User)
+            by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_name', by)
         
         commands = qry.fetch(1000)
@@ -128,7 +128,7 @@ class MultifarceController(object):
     def get_frames(self, by=None):
         qry = model.Frame.all()
         if by:
-            by = blixt.appengine.db.get_id_or_name(by, User)
+            by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_name', by)
         
         frames = qry.fetch(1000)

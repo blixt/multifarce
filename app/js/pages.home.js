@@ -113,7 +113,7 @@ game.listen('execute-success', function (result) {
     $.hash.go('?state=' + game.get_state());
 
     // Show a notification.
-    notify(result.text, 'success');
+    notify(result.text, 'hint');
 
     // Add an entry to the log.
     log.prepend(

@@ -18,6 +18,7 @@
     line-height: 28px;
     list-style: none;
     margin: 0;
+    padding: 0;
     width: 150px;
 }
 
@@ -212,11 +213,11 @@ textarea
 }
 
 #notifications p a span.close {
-    display: none;
+    visibility: hidden;
 }
 
 #notifications p a:hover span.close {
-    display: block;
+    visibility: visible;
 }
 
 #notifications span.close {
@@ -396,6 +397,14 @@ label {
     font-size: 17px;
     line-height: 34px;
     width: 160px;
+}
+
+ol, ul {
+    padding-left: 30px;
+}
+
+ol.object-list, ul.object-list {
+    font-size: 80%;
 }
 
 p {
