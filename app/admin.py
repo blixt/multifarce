@@ -33,7 +33,7 @@ class SetupHandler(webapp.RequestHandler):
         user = multifarce.model.User.get_current(self)
         if not user:
             w('Registering new user...\r\n')
-            multifarce.model.User.register('blixt', 'Blixt')
+            multifarce.model.User.register('admin', 'Admin', 'admin@example.com')
             user = multifarce.model.User.get_current(self)
             if not user:
                 w('Failed!\r\n')
