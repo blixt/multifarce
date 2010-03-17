@@ -248,57 +248,11 @@ class Frame(db.Model):
                 'Invalid type (text); expected string.',
                 'TYPE_ERROR')
 
-        # Validate image.
-        if image != None:
-            if isinstance(image, ImageData):
-                image = image.key().id()
-            elif isinstance(image, int):
-                if not blixt.appengine.db.entity_exists(image, ImageData):
-                    raise multifarce.CreateFrameError(
-                        'Image does not exist.',
-                        'IMAGE_NOT_FOUND')
-            else:
-                raise multifarce.CreateFrameError(
-                    'Invalid type (go_to_frame); expected Frame or int.',
-                    'TYPE_ERROR')
-
         frame = Frame(user_id=user.key().id(), image_id=image,
                       title=title, text=text)
         frame.put()
 
         return frame
-
-# TODO
-class Report(db.Model):
-    pass
-
-class ImageData(db.Model):
-    """Holds the data for an image.
-    """
-    content_type = db.StringProperty()
-    data = db.BlobProperty()
-
-    @staticmethod
-    def upload(data):
-        # Don't allow files larger than 200 kB.
-        if len(data) > 200 * 1024:
-            raise multifarce.UploadError(
-                'File is too big. Max size is 200 kB.',
-                'FILE_TOO_LARGE')
-
-        img = images.Image(data)
-
-        # Validate image dimensions.
-        if img.width != MAX_IMAGE_SIZE or img.height != MAX_IMAGE_SIZE:
-            raise multifarce.UploadError(
-                'Invalid image size. Max width/height is %d.' % MAX_IMAGE_SIZE,
-                'INVALID_IMAGE_SIZE')
-
-        # Create an ImageData instance.
-        img_data = ImageData(content_type='image/jpeg', data=data)
-        img_data.put()
-
-        return img_data
 
 class User(db.Model):
     """Represents a Multifarce user.
