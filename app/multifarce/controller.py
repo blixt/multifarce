@@ -131,10 +131,8 @@ class MultifarceController(object):
             by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_id', by)
         
-        frames = qry.fetch(1000)
-
         result = []
-        for frame in frames:
+        for frame in qry:
             result.append(self.get_frame(frame))
 
         return result
