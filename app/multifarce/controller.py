@@ -2,7 +2,7 @@
 # Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
 #
 
-import md5
+import hashlib
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -163,7 +163,7 @@ class MultifarceController(object):
             result['user_id'] = user.key().id()
             result['display_name'] = user.display_name
             result['email'] = user.email
-            result['email_md5'] = md5.new(user.email.lower()).hexdigest()
+            result['email_md5'] = hashlib.md5(user.email).hexdigest()
             result['type'] = 'local' if user.password else 'google'
             result['logged_in'] = True
         else:
