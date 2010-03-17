@@ -156,24 +156,23 @@ var api = (function () {
             simpleCall('get_top_commands', {frame: frameId}, 120000);
         },
         
-        getUserInfo: function (username) {
-            simpleCall('get_user_info', {user: username}, 60000);
+        getUserInfo: function (id) {
+            simpleCall('get_user_info', {user: id}, 60000);
         },
         
-        logIn: function (username, password) {
-            simpleCall('log_in', {username: username, password: password});
+        logIn: function (email, password) {
+            simpleCall('log_in', {email: email, password: password});
         },
         
         logOut: function () {
             simpleCall('log_out', {});
         },
         
-        register: function (username, displayName, password, email) {
+        register: function (email, displayName, password) {
             simpleCall('register', {
-                username: username,
+                email: email,
                 display_name: displayName,
-                password: password,
-                email: email
+                password: password
             });
         },
 

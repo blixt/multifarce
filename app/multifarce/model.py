@@ -18,7 +18,7 @@ MAX_COMMANDS_PER_FRAME_PER_USER = 15
 MAX_IMAGE_SIZE = 650
 
 class Command(db.Model):
-    user_name = db.StringProperty(required=True)
+    user_id = db.IntegerProperty(required=True)
     frame_id = db.IntegerProperty(required=True)
     synonyms = db.StringListProperty(required=True)
     text = db.StringProperty(required=True)
@@ -104,7 +104,7 @@ class Command(db.Model):
 
         # Limit number of commands that can be created on a single frame by one
         # user.
-        count = Command.gql('WHERE user_name = :user AND frame_id = :frame',
+        count = Command.gql('WHERE user_id = :user AND frame_id = :frame',
                             user=user, frame=frame).count()
         if count >= MAX_COMMANDS_PER_FRAME_PER_USER:
             raise multifarce.CreateCommandError(
@@ -160,7 +160,7 @@ class Command(db.Model):
         # TODO: Validate flags variables.
 
         # Create and store command.
-        cmd = Command(user_name=user, frame_id=frame, synonyms=commands,
+        cmd = Command(user_id=user, frame_id=frame, synonyms=commands,
                       text=text, go_to_frame_id=go_to_frame,
                       flags_on=flags_on, flags_off=flags_off,
                       flags_required=flags_required)
@@ -226,7 +226,7 @@ class CommandUsage(db.Model):
         db.run_in_transaction(txn)
 
 class Frame(db.Model):
-    user_name = db.StringProperty(required=True)
+    user_id = db.IntegerProperty(required=True)
     image_id = db.IntegerProperty()
     title = db.StringProperty(required=True)
     text = db.StringProperty(required=True, multiline=True)
@@ -262,7 +262,7 @@ class Frame(db.Model):
                     'Invalid type (go_to_frame); expected Frame or int.',
                     'TYPE_ERROR')
 
-        frame = Frame(user_name=user.key().name(), image_id=image,
+        frame = Frame(user_id=user.key().id(), image_id=image,
                       title=title, text=text)
         frame.put()
 
@@ -306,7 +306,7 @@ class User(db.Model):
     user = db.UserProperty()
     display_name = db.StringProperty()
     password = db.StringProperty()
-    email = db.EmailProperty()
+    email = db.EmailProperty(required=True)
     joined = db.DateTimeProperty(auto_now_add=True)
     state = db.StringProperty(choices=['inactive', 'member'],
                               default='member')
@@ -339,18 +339,18 @@ class User(db.Model):
         return user
 
     @staticmethod
-    def log_in(username, password, handler):
-        """Retrieves a User instance, based on a username and a password, and
+    def log_in(email, password, handler):
+        """Retrieves a User instance, based on an e-mail and a password, and
         starts a session.
 
         The SHA-256 hash of the password must match the hash stored in the
         database, otherwise an exception will be raised.
         """
-        user = User.get_by_key_name(username.lower())
+        user = User.all().filter('email', email.strip().lower()).get()
         if not user:
             raise multifarce.LogInError(
-                'Could not find a user with the specified username.',
-                'USER_NOT_FOUND')
+                'Wrong e-mail address or password.',
+                'WRONG_CREDENTIALS')
 
         # The user attribute will be something other than "user@multifarce.com"
         # if the user is registered through a Google account.
@@ -362,8 +362,8 @@ class User(db.Model):
 
         if hashlib.sha256(password).hexdigest() != user.password:
             raise multifarce.LogInError(
-                'Wrong password.',
-                'WRONG_PASSWORD')
+                'Wrong e-mail address or password.',
+                'WRONG_CREDENTIALS')
 
         if user.state == 'inactive':
             raise multifarce.LogInError(
@@ -375,7 +375,7 @@ class User(db.Model):
         return user
 
     @staticmethod
-    def register(username, display_name, email, password=None):
+    def register(email, display_name, password=None):
         """Creates a new user that is registered to the application. If the user
         is logged in with a Google account and password is not supplied, the new
         user will be linked to the Google account.
@@ -384,31 +384,18 @@ class User(db.Model):
         database should be exposed, the passwords would not be of any use to the
         attacker.
         """
-        try:
-            if len(username) < 3:
-                raise multifarce.UsernameError(
-                    'Username must be at least three characters long.',
-                    'USERNAME_TOO_SHORT')
-            if len(username) > 20:
-                raise multifarce.UsernameError(
-                    'Username must not be any longer than 20 characters.',
-                    'USERNAME_TOO_LONG')
-
-            if not re.match('^[A-Za-z]([\\-\\._]?[A-Z0-9a-z]+)*$', username):
-                raise multifarce.UsernameError(
-                    'Username should start with a letter, followed by letters '
-                    'and/or digits, optionally with dashes, periods or '
-                    'underscores inbetween.',
-                    'USERNAME_INVALID_CHARACTERS')
-
-            if User.get_by_key_name(username.lower()):
-                raise multifarce.UsernameError(
-                    'Username is already in use.',
-                    'USERNAME_IN_USE')
-        except multifarce.UsernameError, e:
+        email = email.strip().lower()
+        
+        qry = User.all(keys_only=True).filter('email', email)
+        if qry.get():
             raise multifarce.RegisterError(
-                'Could not use username (%s)' % e,
-                e.code)
+                'E-mail is already in use.',
+                'EMAIL_IN_USE')
+
+        if not mail.is_email_valid(email):
+            raise multifarce.RegisterError(
+                'A valid e-mail address must be provided.',
+                'INVALID_EMAIL')
 
         try:
             if len(display_name) < 3:
@@ -439,13 +426,6 @@ class User(db.Model):
                 'Could not use display name (%s)' % e,
                 e.code)
 
-        try:
-            mail.check_email_valid(email, 'to')
-        except mail.InvalidEmailError:
-            raise multifarce.RegisterError(
-                'A valid e-mail address must be provided.',
-                'INVALID_EMAIL')
-
         if User.all(keys_only=True).filter('email', email).get():
             raise multifarce.RegisterError(
                 'E-mail address is already in use.',
@@ -463,8 +443,7 @@ class User(db.Model):
                     'The current Google account is already linked to an '
                     'existing user.',
                     'GOOGLE_ACCOUNT_IN_USE')
-            user = User(key_name=username.lower(),
-                        user=google_user,
+            user = User(user=google_user,
                         display_name=display_name,
                         email=db.Email(email),
                         state='member')
@@ -473,8 +452,7 @@ class User(db.Model):
                 'Password must be at least 4 characters long.',
                 'INVALID_PASSWORD')
         else:
-            user = User(key_name=username.lower(),
-                        user=users.User('user@multifarce.com'),
+            user = User(user=users.User('user@multifarce.com'),
                         display_name=display_name,
                         email=db.Email(email),
                         password=hashlib.sha256(password).hexdigest())

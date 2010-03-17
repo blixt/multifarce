@@ -12,7 +12,7 @@ import multifarce
 from multifarce import model
 
 # TODO: This should somehow be more dynamic.
-FIRST_FRAME_ID = 1
+FIRST_FRAME_ID = 2
 
 class MultifarceController(object):
     def clean(self, command):
@@ -89,7 +89,7 @@ class MultifarceController(object):
                 'The specified command could not be found.',
                 'COMMAND_NOT_FOUND')
 
-        result = {'id': command.key().id(), 'author': command.user_name,
+        result = {'id': command.key().id(), 'author': command.user_id,
                   'frame_id': command.frame_id, 'synonyms': command.synonyms,
                   'text': command.text,
                   'go_to_frame_id': command.go_to_frame_id,
@@ -101,7 +101,7 @@ class MultifarceController(object):
         qry = model.Command.all()
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
-            qry.filter('user_name', by)
+            qry.filter('user_id', by)
         
         commands = qry.fetch(1000)
 
@@ -121,7 +121,7 @@ class MultifarceController(object):
             raise multifarce.GetFrameError(
                 'The specified frame could not be found.', 'FRAME_NOT_FOUND')
 
-        result = {'id': frame.key().id(), 'author': frame.user_name,
+        result = {'id': frame.key().id(), 'author': frame.user_id,
                   'title': frame.title, 'text': frame.text}
         return result
 
@@ -129,7 +129,7 @@ class MultifarceController(object):
         qry = model.Frame.all()
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
-            qry.filter('user_name', by)
+            qry.filter('user_id', by)
         
         frames = qry.fetch(1000)
 
@@ -140,7 +140,7 @@ class MultifarceController(object):
         return result
 
     def get_status(self, path='/'):
-        """Returns the status for the current user, such as username and
+        """Returns the status for the current user, such as e-mail and
         display name if the user is logged in. If the user is linked to a
         Google account, the Google logout URL will also be provided.
 
@@ -160,7 +160,7 @@ class MultifarceController(object):
 
         user = model.User.get_current(self)
         if user:
-            result['username'] = user.key().name()
+            result['user_id'] = user.key().id()
             result['display_name'] = user.display_name
             result['email'] = user.email
             result['email_md5'] = md5.new(user.email.lower()).hexdigest()
@@ -188,17 +188,17 @@ class MultifarceController(object):
             raise multifarce.NotFoundError(
                 'The specified user could not be found.', 'USER_NOT_FOUND')
 
-        result = {'username': user.key().name(),
+        result = {'user_id': user.key().id(),
                   'display_name': user.display_name,
                   'email_md5': md5.new(user.email.lower()).hexdigest()}
         return result
 
-    def log_in(self, username, password):
+    def log_in(self, email, password):
         """Attempts to log in using the specified credentials. Will fail if the
-        username does not exist, the password is wrong or if the user is linked
-        to a Google account.
+        e-mail is not found, the password is wrong or if the user is linked to
+        a Google account.
         """
-        model.User.log_in(username, password, self)
+        model.User.log_in(email, password, self)
         return self.get_status()
 
     def log_out(self):
@@ -209,13 +209,13 @@ class MultifarceController(object):
         if user:
             user.end_session(self)
 
-    def register(self, username, display_name, email, password=None):
-        """Registers a user to Multifarce. If password and e-mail is omitted,
-        the user will be linked to the currently logged in Google account (or
+    def register(self, email, display_name, password=None):
+        """Registers a user to Multifarce. If password is omitted, the user
+        will be linked to the currently logged in Google account (or
         fails if the user is not logged in with a Google account.)
 
         Normal user accounts will need to be activated using a code sent to
         their e-mail before they can log in. If linking to a Google account,
         no activation is required.
         """
-        model.User.register(username, display_name, email, password)
+        model.User.register(email, display_name, password)

@@ -25,6 +25,8 @@ class SetupHandler(webapp.RequestHandler):
             self.error(404)
             return
 
+        google_user = users.get_current_user()
+
         w = self.response.out.write
 
         w('<pre>')
@@ -34,7 +36,7 @@ class SetupHandler(webapp.RequestHandler):
         user = multifarce.model.User.get_current(self)
         if not user:
             w('Registering new user...\r\n')
-            multifarce.model.User.register('admin', 'Admin', 'admin@example.com')
+            multifarce.model.User.register(google_user.email(), 'Admin')
             user = multifarce.model.User.get_current(self)
             if not user:
                 w('Failed!\r\n')

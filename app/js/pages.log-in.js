@@ -3,7 +3,7 @@ var LogInHandler;
 
 var
 page = allPages.filter('#log-in-page'),
-username = page.find('#log-in-username'),
+email = page.find('#log-in-email'),
 password = page.find('#log-in-password'),
 go = page.find('#log-in-go'),
 
@@ -21,7 +21,7 @@ greetings = [
 
 // Set up events.
 $('#log-in-go').live('click', function () {
-    User.logIn(username.val(), password.val(), function (user) {
+    User.logIn(email.val(), password.val(), function (user) {
         var i = Math.floor(Math.random() * greetings.length);
         notify(greetings[i].replace('{name}', user.display_name), 'success');
         $.hash.go(nextPath);
@@ -32,7 +32,7 @@ $('#log-in-go').live('click', function () {
 LogInHandler = Application.handler(function () {
     nextPath = this.get_param('continue', '');
 
-    username.val('');
+    email.val('');
     password.val('');
 
     setPage('Log in', page);

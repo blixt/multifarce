@@ -3,9 +3,8 @@ var RegisterHandler;
 
 var
 page = allPages.filter('#register-page'),
-username = page.find('#register-username'),
-displayName = page.find('#register-name'),
 email = page.find('#register-email'),
+displayName = page.find('#register-name'),
 password = page.find('#register-password'),
 passwordRepeat = page.find('#register-password-2'),
 useGoogle = page.find('input[name=register-use-google]'),
@@ -33,9 +32,7 @@ $('#register-go').live('click', function () {
             $.hash.go('log-in');
         }
     });
-    api.register(
-        username.val(), displayName.val(),
-        password.val() || null, email.val());
+    api.register(email.val(), displayName.val(), password.val() || null);
 });
 
 $('#register-page input[name=register-use-google]').live('click', function () {
@@ -54,10 +51,9 @@ $('#register-page input[name=register-use-google]').live('click', function () {
 });
 
 RegisterHandler = Application.handler(function () {
-    username.val('');
-    displayName.val('');
     email.val(
         currentUser.googleLoggedIn() ? currentUser.get_googleEmail() : '');
+    displayName.val('');
     password.val('');
     passwordRepeat.val('');
     useGoogle.val('no');

@@ -22,7 +22,7 @@ CreateHandler = Application.handler(function () {
                                 .text(data[i].title)));
             }
         });
-        api.getFrames(currentUser.get_username());
+        api.getFrames(currentUser.get_id());
 
         api.success(function (data) {
             for (var i = 0; i < data.length; i++) {
@@ -37,7 +37,7 @@ CreateHandler = Application.handler(function () {
                             $('<a/>').frame(data[i].frame_id)));
             }
         });
-        api.getCommands(currentUser.get_username());
+        api.getCommands(currentUser.get_id());
     }
 
     setPage('Create', page,

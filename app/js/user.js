@@ -5,7 +5,7 @@ var User = (function () {
     currentUser,
 
     // Constructor.
-    cls = function (username) {
+    cls = function (id) {
         // Inherit EventSource functionality.
         EventSource.call(this, 'load');
         
@@ -14,7 +14,7 @@ var User = (function () {
 
         error = function () {
             this.clearHandlers();
-            if (username) delete cache[username];
+            if (id) delete cache[id];
         },
         
         success = function (user) {
@@ -26,12 +26,12 @@ var User = (function () {
         // Getters/setters.
         this.get_displayName = function () { return data.display_name; };
         this.get_emailHash = function () { return data.email_md5; };
-        this.get_username = function () { return data.username; };
+        this.get_id = function () { return data.user_id; };
         this.isCurrent = function () { return this == currentUser; };
         this.isLoaded = function () { return loaded; };
         
         // Extra functionality for the special "current user" object.
-        if (!username) {
+        if (!id) {
             this.get_email = function () { return data.email; };
             this.get_googleEmail = function () {
                 return data.google_email;
@@ -59,8 +59,8 @@ var User = (function () {
         
             api.success(success, this).error(error, this);
 
-            if (username)
-                api.getUserInfo(username);
+            if (id)
+                api.getUserInfo(id);
             else
                 api.getStatus();
         };
@@ -72,18 +72,18 @@ var User = (function () {
         return currentUser;
     };
     
-    cls.get = function (username) {
-        if (typeof username != 'string')
-            throw 'Invalid type (username); expected string.';
+    cls.get = function (id) {
+        if (typeof id != 'number')
+            throw 'Invalid type (id); expected number.';
 
-        if (username in cache) {
-            return cache[username];
+        if (id in cache) {
+            return cache[id];
         } else {
-            cache[username] = new cls(username);
+            cache[id] = new cls(id);
         }
     };
     
-    cls.logIn = function (username, password, success, error) {
+    cls.logIn = function (email, password, success, error) {
         var cur = cls.current();
         
         if (cur.loggedIn()) return;
@@ -95,7 +95,7 @@ var User = (function () {
 
         if (error) api.error(error);
 
-        api.logIn(username, password);
+        api.logIn(email, password);
     };
     
     cls.logOut = function () {
