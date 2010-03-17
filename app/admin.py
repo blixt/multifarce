@@ -23,6 +23,7 @@ class SetupHandler(webapp.RequestHandler):
         # Require that currently logged in Google user is application admin.
         if not users.is_current_user_admin():
             self.error(404)
+            return
 
         w = self.response.out.write
 
