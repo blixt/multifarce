@@ -257,14 +257,13 @@ class Frame(db.Model):
 class User(db.Model):
     """Represents a Multifarce user.
     """
-    user = db.UserProperty()
-    display_name = db.StringProperty()
+    user = db.UserProperty(required=True)
+    display_name = db.StringProperty(required=True)
     password = db.StringProperty()
     email = db.EmailProperty(required=True)
     joined = db.DateTimeProperty(auto_now_add=True)
     state = db.StringProperty(choices=['inactive', 'member'],
                               default='member')
-    current_frame_id = db.IntegerProperty()
     session = db.StringProperty()
     expires = db.DateTimeProperty()
 
