@@ -1,2 +1,5 @@
+app/js/multifarce.js
+app/js/multifarce.min.js
+app/media/style.min.css
 *.pyc
 .temp
