@@ -108,7 +108,9 @@ getPage, setPage, notify;
                 .fadeIn(500)
                 .animate({opacity: 0}, 15000, 'easeInQuart',
                     function () {
-                        $(this).remove();
+                        $(this).slideUp(200, function () {
+                            $(this).remove();
+                        });
                     }));
     };
 })();
