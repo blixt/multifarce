@@ -61,7 +61,8 @@ var game = (function () {
 
             if (!frameId) {
                 this.raise('execute-error', {
-                    message: 'The game has not been started!'});
+                    message: 'The game has not been started yet! Enter the ' +
+                             'command "start" to start the game!'});
                 return;
             }
 
