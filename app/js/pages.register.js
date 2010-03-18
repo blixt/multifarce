@@ -56,7 +56,11 @@ RegisterHandler = Application.handler(function () {
     displayName.val('');
     password.val('');
     passwordRepeat.val('');
-    useGoogle.val('no');
+    useGoogle.filter('[value=no]').attr('checked', true);
+    $([password[0], passwordRepeat[0]])
+        .attr('disabled', false)
+        .parent()
+            .removeClass('disabled');
 
     setPage('Register', page);
 });
