@@ -14,7 +14,7 @@ greetings = [
     'Hello {name}!',
     'Yo {name}!',
     'G\'day {name}!',
-    '¡Hola {name}!',
+    'Â¡Hola {name}!',
     'Salut {name}!',
     'Konnichiwa {name}!',
     'Ciao {name}!'];
