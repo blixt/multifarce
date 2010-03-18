@@ -19,7 +19,7 @@ class JsonService(webapp.RequestHandler):
     def _is_public_attr(self, action):
         return (not action.startswith('_') and
                 hasattr(self, action))
-               
+
     def get(self, action):
         out = {'status': 'unknown',
                'response': None}
@@ -75,7 +75,7 @@ class JsonService(webapp.RequestHandler):
 
                     if varargs: spec += ', *%s' % varargs
                     if varkw: spec += ', **%s' % varkw
-                    
+
                     res.write(a)
                     res.write('(')
                     res.write(spec)
@@ -88,7 +88,7 @@ class JsonService(webapp.RequestHandler):
 
             out['response'] = res.getvalue()
             res.close()
-            
+
         self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(simplejson.dumps(out, separators=(',', ':')))
 

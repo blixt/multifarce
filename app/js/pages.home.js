@@ -28,7 +28,7 @@ execute = function () {
     } else {
         game.execute(command);
     }
-    
+
     action.focus();
 };
 
@@ -54,7 +54,7 @@ game.listen('frame-load', function (data) {
          .queue(function () {
             frameTitle.text(data.title);
             frameText.formattedText(data.text);
-            
+
             // Calculate new height that the frame will expand to.
             frame.css({
                 position: 'absolute',
@@ -66,7 +66,7 @@ game.listen('frame-load', function (data) {
                 height: frame.height(),
                 opacity: 1
             }, 1000);
-            
+
             // Reset height.
             frame.css({
                 height: 0,

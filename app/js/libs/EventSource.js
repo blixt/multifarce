@@ -34,7 +34,7 @@ var EventSource = function () {
             throw 'Type error (argument); expected string.';
         events[name] = [];
     }
-    
+
     // Public members.
     this.clearHandlers = function (event) {
         if (event) {
@@ -50,7 +50,7 @@ var EventSource = function () {
             }
         }
     };
-    
+
     this.listen = function (event, handler, bind) {
         if (typeof event != 'string')
             throw 'Type error (event); expected string.';
@@ -58,23 +58,23 @@ var EventSource = function () {
             throw 'Unsupported event: ' + event;
         if (typeof handler != 'function')
             throw 'Type error (handler); expected function.';
-        
+
         events[event].push([handler, bind || this]);
     };
-    
+
     this.raise = function (event) {
         // No validation for the sake of performance.
         var e = events[event], i, l, args = slice.call(arguments, 1);
         for (i = 0, l = e.length; i < l; i++)
             e[i][0].apply(e[i][1], args);
     };
-    
+
     this.unlisten = function (event, handler, bind) {
         if (typeof event != 'string')
             throw 'Type error (event); expected string.';
         if (!(event in events))
             throw 'Unsupported event: ' + event;
-        
+
         var e = events[event], i;
         for (i = e.length - 1; i >= 0; i--) {
             if (e[i][0] == handler) {

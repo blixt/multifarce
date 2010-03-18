@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-import os, os.path, shutil
+import os
+import os.path
+import shutil
 
 YUI_COMPRESSOR = 'yuicompressor-2.4.2.jar'
 

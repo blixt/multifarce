@@ -18,11 +18,11 @@ go = page.find('#new-command-go');
 $('#new-command-go').live('click', function () {
     var commands = [command1.val(), command2.val(), command3.val(),
                     command4.val(), command5.val()];
-    
+
     var frameId = parseInt(frame.val(), 10);
     var goToFrameId = parseInt(goToFrame.val(), 10);
     if (goToFrameId <= 0) goToFrameId = null;
-    
+
     api.success(function (command) {
         notify('The command has been successfully created!', 'success');
         $.hash.go('commands/' + command.id);
@@ -66,7 +66,7 @@ NewCommandHandler = Application.handler(function () {
                     .val(frames[i].id)
                     .text(frames[i].title));
         }
-        
+
         frame.val(this.get_param('frame', ''));
     }, this).getFrames();
 

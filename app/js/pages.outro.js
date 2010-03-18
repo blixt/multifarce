@@ -50,7 +50,7 @@ currentUser.listen('load', function () {
         action1.text('Register').hash('register');
         action2.text('Log in').hash('log-in');
     }
-    
+
     // Handle Google Accounts notices.
     var show, hide;
     if (this.googleLoggedIn()) {

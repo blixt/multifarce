@@ -50,7 +50,7 @@ def get_instance(value, model):
     """
     if not issubclass(model, db.Model):
         raise TypeError('Invalid type (model); expected subclass of Model.')
-    
+
     if isinstance(value, basestring):
         return model.get_by_key_name(value)
     elif isinstance(value, (int, long)):

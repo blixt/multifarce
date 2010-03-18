@@ -44,7 +44,7 @@ var Application = (function () {
     decodeReplace = function (match, code) {
         return String.fromCharCode(parseInt(code, 16));
     },
-    
+
     encodeRegex = /[^A-Za-z0-9,_!~*'()-]/g,
     encodeReplace = function (chr) {
         var code = chr.charCodeAt(0);
@@ -60,7 +60,7 @@ var Application = (function () {
         var
         patterns = [],
         handlers = [],
-        
+
         register = function (pattern, handler) {
             if (typeof pattern == 'string') pattern = new RegExp(pattern);
             if (!(pattern instanceof RegExp))
@@ -87,7 +87,7 @@ var Application = (function () {
                 pieces = requestPath.substr(i + 1).split('&');
                 // Set new path to everything before ?
                 path = requestPath.substr(0, i);
-                
+
                 for (i = 0, l = pieces.length; i < l; i++) {
                     pair = pieces[i].split('=', 2);
                     // Repeated parameters with the same name are overwritten.
@@ -111,11 +111,11 @@ var Application = (function () {
                     return;
                 }
             }
-            
+
             // No handler found.
         };
     };
-    
+
     // Static public members.
 
     // The decode/encode functions act the same as {decode|encode}URIComponent,
@@ -158,18 +158,18 @@ var Application = (function () {
             this.get_path = function () {
                 return path;
             };
-            
+
             // Return the requested path (including query string.)
             this.get_requestPath = function () {
                 return requestPath;
             };
-            
+
             // Get the application that created this handler.
             this.get_app = function () {
                 return app;
             }
         };
-        
+
         handler.prototype = {
             // Rerun the handler after the specified number of milliseconds.
             delay: function (time) {
@@ -189,9 +189,9 @@ var Application = (function () {
             },
             run: runFunction
         };
-        
+
         return handler;
     };
-    
+
     return cls;
 })();

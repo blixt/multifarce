@@ -57,7 +57,7 @@ jQuery.hash = {
         // init can only be called once.
         if (init) return;
         init = 1;
-        
+
         var iframe;
         if (window.ActiveXObject && (!documentMode || documentMode < 8)) {
             // Create an iframe for Internet Explorer 7 and below.
@@ -66,7 +66,7 @@ jQuery.hash = {
                 'src="' + (src || iframeSrc) + '"></iframe>');
             iframe = jQuery('#' + iframeId)[0];
         }
-        
+
         Hash.init(callback, iframe);
     },
 
@@ -84,7 +84,7 @@ jQuery.fn.hash = function (newHash, changeHref) {
         if (changeHref || changeHref === undefined)
             this.attr('href', '#' + newHash);
     }
-    
+
     return this;
 };
 

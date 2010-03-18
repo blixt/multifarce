@@ -16,12 +16,15 @@ FIRST_FRAME_ID = 2
 
 class MultifarceController(object):
     def clean(self, command):
-        """Cleans a single command or a list of commands."""
+        """Cleans a single command or a list of commands.
+
+        """
         return model.Command.clean(command)
 
     def create_command(self, frame, commands, text, go_to_frame=None,
                        flags_on=[], flags_off=[], flags_required=[]):
         """Creates a new command for the specified frame.
+
         """
         user = model.User.get_current(self)
         if not user:
@@ -37,6 +40,7 @@ class MultifarceController(object):
 
     def create_frame(self, title, text):
         """Creates a new frame.
+
         """
         user = model.User.get_current(self)
         if not user:
@@ -50,6 +54,7 @@ class MultifarceController(object):
 
     def execute(self, frame, command, flags=None):
         """Executes a command for the specified frame.
+
         """
         cmd = model.Command.find(frame, command)
         if not cmd:
@@ -102,7 +107,7 @@ class MultifarceController(object):
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_id', by)
-        
+
         commands = qry.fetch(1000)
 
         result = []
@@ -130,7 +135,7 @@ class MultifarceController(object):
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_id', by)
-        
+
         result = []
         for frame in qry:
             result.append(self.get_frame(frame))
@@ -143,6 +148,7 @@ class MultifarceController(object):
         Google account, the Google logout URL will also be provided.
 
         If the user is not logged in, the Google login URL will be provided.
+
         """
         result = {}
 
@@ -171,6 +177,7 @@ class MultifarceController(object):
 
     def get_top_commands(self, frame):
         """Returns the most entered commands for the specified frame.
+
         """
         commands = []
         for command in model.CommandUsage.get_top(frame):
@@ -180,6 +187,7 @@ class MultifarceController(object):
     def get_user_info(self, user):
         """Returns information about the specified user. Fails if the user does
         not exist.
+
         """
         user = blixt.appengine.db.get_instance(user, model.User)
         if not user:
@@ -195,6 +203,7 @@ class MultifarceController(object):
         """Attempts to log in using the specified credentials. Will fail if the
         e-mail is not found, the password is wrong or if the user is linked to
         a Google account.
+
         """
         model.User.log_in(email, password, self)
         return self.get_status()
@@ -202,6 +211,7 @@ class MultifarceController(object):
     def log_out(self):
         """Logs out the current user. Has no effect if the user is not logged
         in, or if the user is logged in with a Google account.
+
         """
         user = model.User.get_current(self)
         if user:
@@ -215,5 +225,6 @@ class MultifarceController(object):
         Normal user accounts will need to be activated using a code sent to
         their e-mail before they can log in. If linking to a Google account,
         no activation is required.
+
         """
         model.User.register(email, display_name, password)

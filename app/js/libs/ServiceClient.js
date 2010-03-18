@@ -63,12 +63,12 @@ var ServiceClient = (function (jQuery, JSON) {
                 errorHandler = null;
                 return;
             }
-            
+
             if (typeof func != 'function')
                 throw 'Type error (func); expected function or null.';
             if (typeof bind != 'object' && typeof bind != 'undefined')
                 throw 'Type error (bind); expected object.';
-            
+
             errorHandler = func;
             errorBind = bind;
         };

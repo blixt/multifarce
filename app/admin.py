@@ -4,8 +4,9 @@
 
 """Admin for the Multifarce application.
 
-Registers the WSGI web application with request handlers, also defined
-in this file.
+Registers the WSGI web application with request handlers, also defined in this
+file.
+
 """
 
 import wsgiref.handlers
@@ -48,9 +49,10 @@ class SetupHandler(webapp.RequestHandler):
             frame = multifarce.model.Frame.create(
                 user, 'The Beginning',
                 'You\'re in an ever-changing room. It\'s not really a room, '
-                'because it has no walls or ceiling. In fact, it doesn\'t even '
-                'exist! You sense that the mere thought of something would '
-                'bring everything around you into existence. What will you do?')
+                'because it has no walls or ceiling. In fact, it doesn\'t '
+                'even exist! You sense that the mere thought of something '
+                'would bring everything around you into existence. What will '
+                'you do?')
 
             fid = frame.key().id()
             user.current_frame_id = fid

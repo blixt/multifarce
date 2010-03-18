@@ -9,7 +9,7 @@ $.fn.command = function (id) {
     api.success(function (command) {
         $this.text(command.synonyms.join(', '));
     }).getCommand(id);
-    
+
     return $this;
 };
 
@@ -76,7 +76,7 @@ getPage, setPage, notify;
 
             return;
         }
-    
+
         if (title) {
             pageName.text(title);
             document.title = title + ' - ' + APP_TITLE;

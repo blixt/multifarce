@@ -2,7 +2,10 @@
 # Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
 #
 
-import hashlib, re, time, uuid
+import hashlib
+import re
+import time
+import uuid
 from datetime import datetime, timedelta
 
 from google.appengine.api import mail, images, users
@@ -31,6 +34,7 @@ class Command(db.Model):
     def clean(command):
         """Cleans command/flag names. Makes the name lower case, removes
         non-alpha characters and extraneous whitespace.
+
         """
         if isinstance(command, list):
             commands = []
@@ -73,6 +77,7 @@ class Command(db.Model):
     def create(user, frame, commands, text, go_to_frame=None,
                flags_on=[], flags_off=[], flags_required=[]):
         """Creates a new command.
+
         """
         user = blixt.appengine.db.get_id_or_name(user, User)
         if not user:
@@ -118,7 +123,7 @@ class Command(db.Model):
             raise multifarce.CreateCommandError(
                 'At least one command must be specified.',
                 'COMMAND_MISSING')
-        
+
         if len(commands) > 5:
             raise multifarce.CreateCommandError(
                 'There can only be a maximum of 5 synonyms for a single '
@@ -256,6 +261,7 @@ class Frame(db.Model):
 
 class User(db.Model):
     """Represents a Multifarce user.
+
     """
     user = db.UserProperty(required=True)
     display_name = db.StringProperty(required=True)
@@ -270,6 +276,7 @@ class User(db.Model):
     @staticmethod
     def get_current(handler):
         """Retrieves a User instance for the currently logged in user.
+
         """
         user = None
 
@@ -298,6 +305,7 @@ class User(db.Model):
 
         The SHA-256 hash of the password must match the hash stored in the
         database, otherwise an exception will be raised.
+
         """
         user = User.all().filter('email', email.strip().lower()).get()
         if not user:
@@ -329,16 +337,17 @@ class User(db.Model):
 
     @staticmethod
     def register(email, display_name, password=None):
-        """Creates a new user that is registered to the application. If the user
-        is logged in with a Google account and password is not supplied, the new
-        user will be linked to the Google account.
+        """Creates a new user that is registered to the application. If the
+        user is logged in with a Google account and password is not supplied,
+        the new user will be linked to the Google account.
 
-        Only the SHA-256 hash of the password will be stored so that in case the
-        database should be exposed, the passwords would not be of any use to the
-        attacker.
+        Only the SHA-256 hash of the password will be stored so that in case
+        the database should be exposed, the passwords would not be of any use
+        to the attacker.
+
         """
         email = email.strip().lower()
-        
+
         qry = User.all(keys_only=True).filter('email', email)
         if qry.get():
             raise multifarce.RegisterError(
@@ -383,7 +392,7 @@ class User(db.Model):
             raise multifarce.RegisterError(
                 'E-mail address is already in use.',
                 'EMAIL_IN_USE')
-        
+
         if password is None:
             google_user = users.get_current_user()
             if not google_user:
@@ -416,6 +425,7 @@ class User(db.Model):
     def end_session(self, handler):
         """Removes a session from the database and the client, effectively
         logging the user out.
+
         """
         self.session = None
         self.expires = None
@@ -429,6 +439,7 @@ class User(db.Model):
     def start_session(self, handler):
         """Gives the user a session id and stores it as a cookie in the user's
         browser.
+
         """
         # Create a unique session id.
         self.session = uuid.uuid4().get_hex()

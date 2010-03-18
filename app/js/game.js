@@ -25,21 +25,21 @@ var game = (function () {
         api.getTopCommands(frame.id);
         this.raise('frame-load', frame);
     };
-    
+
     return {
         // Getters/setters.
         get_frameId: function () {
             return frameId;
         },
-        
+
         get_frameTitle: function () {
             return frameTitle;
         },
-        
+
         get_state: function () {
             return frameId + ',' + flags.join(',');
         },
-        
+
         set_state: function (state) {
             var
             stateFlags = state.split(','),
@@ -58,7 +58,7 @@ var game = (function () {
         // Execute the specified command for the current state.
         execute: function (command) {
             if (!command) return;
-            
+
             if (!frameId) {
                 this.raise('execute-error', {
                     message: 'The game has not been started!'});
@@ -73,7 +73,7 @@ var game = (function () {
         start: function (initFrameId, initFlags) {
             frameId = initFrameId || 0;
             flags = initFlags || [];
-            
+
             api.success(frameSuccess, this);
             if (frameId > 0)
                 api.getFrame(frameId);

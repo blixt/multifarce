@@ -7,7 +7,7 @@ var api = (function () {
     var
     cache = {},
     service,
-    
+
     onSuccess,
     onSuccessBind,
     onError,
@@ -17,12 +17,12 @@ var api = (function () {
     simpleCall = function (action, args, cacheable) {
         if (cacheable) {
             var key = action, name, cacheObj;
-            
+
             // Build a key unique to the current call.
             for (name in args) {
                 key += '|!|' + name + ':' + args[name];
             }
-            
+
             // Test if the current data is already cached.
             cacheObj = cache[key];
             if (cacheObj && +new Date() < cacheObj.expires) {
@@ -55,9 +55,9 @@ var api = (function () {
                     queue: [[onSuccess, onSuccessBind, onError, onErrorBind]],
                     expires: +new Date() + cacheable
                 };
-                
+
                 var queue = cacheObj.queue;
-                
+
                 // Request the data.
                 service.call(action, args,
                 // Success handler.
@@ -112,7 +112,7 @@ var api = (function () {
                 flags_required: flagsRequired
             });
         },
-        
+
         createFrame: function (title, text) {
             simpleCall('create_frame', {
                 title: title,
@@ -151,23 +151,23 @@ var api = (function () {
         getStatus: function (path) {
             simpleCall('get_status', {path: path});
         },
-        
+
         getTopCommands: function (frameId) {
             simpleCall('get_top_commands', {frame: frameId}, 120000);
         },
-        
+
         getUserInfo: function (id) {
             simpleCall('get_user_info', {user: id}, 60000);
         },
-        
+
         logIn: function (email, password) {
             simpleCall('log_in', {email: email, password: password});
         },
-        
+
         logOut: function () {
             simpleCall('log_out', {});
         },
-        
+
         register: function (email, displayName, password) {
             simpleCall('register', {
                 email: email,
@@ -182,14 +182,14 @@ var api = (function () {
             onErrorBind = setOnErrorBind;
             return this;
         },
-        
+
         success: function (setOnSuccess, setOnSuccessBind) {
             onSuccess = setOnSuccess;
             onSuccessBind = setOnSuccessBind;
             return this;
         }
     };
-    
+
     // Inherit functionality from ServiceClient.
     ServiceClient.call(service, API_PATH);
 

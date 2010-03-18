@@ -6,6 +6,7 @@
 
 Registers the WSGI web application with request handlers, also defined
 in this file.
+
 """
 
 import os

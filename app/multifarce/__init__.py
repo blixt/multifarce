@@ -78,6 +78,7 @@ class NotFoundError(Error):
 class NotLoggedInError(Error):
     """Raised when the user is not logged in and tries to perform an action that
     requires her/him to be logged in.
+
     """
     pass
 
