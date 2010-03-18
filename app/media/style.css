@@ -260,13 +260,8 @@ textarea
     padding: 0;
 }
 
-/*
- * Many thanks to Travis Beckham of squidfingers.com 
- * for his excellent library of free backgrounds!
- * pattern below has had its colors modified.
- */
 body, html {
-    background: #fff url(pattern.gif);
+    background: #358;
 }
 
 body, button, input {
