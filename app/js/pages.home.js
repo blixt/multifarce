@@ -21,7 +21,7 @@ execute = function () {
     log.prepend(
         $('<div class="command"/>').text('> ' + command));
 
-    if (command == 'reset' || command == 'start') {
+    if (command == '/reset' || command == '/start') {
         log.prepend(
             $('<div class="result"/>').text('Starting...'));
         game.start();
