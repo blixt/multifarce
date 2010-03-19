@@ -102,16 +102,21 @@ class MultifarceController(object):
                   'flags_required': command.flags_required}
         return result
 
-    def get_commands(self, by=None):
+    def get_commands(self, frame=None, leads_to_frame=None, by=None):
         qry = model.Command.all()
+        if frame:
+            frame = blixt.appengine.db.get_id_or_name(frame, model.Frame)
+            qry.filter('frame_id', frame)
+        if leads_to_frame:
+            leads_to_frame = blixt.appengine.db.get_id_or_name(leads_to_frame,
+                                                               model.Frame)
+            qry.filter('go_to_frame_id', leads_to_frame)
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
             qry.filter('user_id', by)
 
-        commands = qry.fetch(1000)
-
         result = []
-        for command in commands:
+        for command in qry:
             result.append(self.get_command(command))
 
         return result
