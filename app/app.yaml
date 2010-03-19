@@ -20,6 +20,7 @@ handlers:
 
 - url: /admin/.*
   script: admin.py
+  login: admin
 
 - url: /.*
   script: app.py

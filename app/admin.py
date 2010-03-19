@@ -19,13 +19,7 @@ import multifarce.controller
 import multifarce.model
 
 class SetupHandler(webapp.RequestHandler):
-    @login_required
     def get(self):
-        # Require that currently logged in Google user is application admin.
-        if not users.is_current_user_admin():
-            self.error(404)
-            return
-
         google_user = users.get_current_user()
 
         w = self.response.out.write
