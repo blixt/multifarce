@@ -12,7 +12,6 @@ file.
 import wsgiref.handlers
 from google.appengine.api import users
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import login_required
 
 import multifarce
 import multifarce.controller
@@ -74,4 +73,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
