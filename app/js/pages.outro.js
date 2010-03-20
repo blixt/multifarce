@@ -4,7 +4,7 @@ var site = new Application([
     //['^commands/(\d+)$', CommandHandler],
     ['^commands/new$', NewCommandHandler],
     ['^create$', CreateHandler],
-    //['^frames/(\d+)$', FrameHandler],
+    ['^frames/(\\d+)$', FrameHandler],
     ['^frames/new$', NewFrameHandler],
     ['^log-in$', LogInHandler],
     ['^log-out$', LogOutHandler],

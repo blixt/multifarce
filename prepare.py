@@ -21,6 +21,7 @@ SCRIPTS = [
     'app/js/user.js',
     'app/js/pages.intro.js',
     'app/js/pages.create.js',
+    'app/js/pages.frame.js',
     'app/js/pages.home.js',
     'app/js/pages.log-in.js',
     'app/js/pages.log-out.js',
