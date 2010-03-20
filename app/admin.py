@@ -66,21 +66,21 @@ class SetupHandler(webapp.RequestHandler):
 
         w('</pre>')
 
-class Command(db.Expando):
-    pass
-
-class CommandUsage(db.Expando):
-    pass
-
-class Frame(db.Expando):
-    pass
-
-class User(db.Expando):
-    pass
-
 class UpgradeHandler(webapp.RequestHandler):
     def get(self):
         w = self.response.out.write
+
+        class Command(db.Expando):
+            pass
+
+        class CommandUsage(db.Expando):
+            pass
+
+        class Frame(db.Expando):
+            pass
+
+        class User(db.Expando):
+            pass
 
         try:
             w('<pre>')
