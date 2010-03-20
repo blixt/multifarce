@@ -132,8 +132,10 @@ var api = (function () {
             simpleCall('get_command', {command: commandId}, 120000);
         },
 
-        getCommands: function (by) {
-            simpleCall('get_commands', {by: by}, 120000);
+        getCommands: function (frameId, leadsToFrameId, by) {
+            simpleCall('get_commands', {frame: frameId,
+                                        leads_to_frame: leadsToFrameId,
+                                        by: by}, 120000);
         },
 
         getFirstFrame: function () {

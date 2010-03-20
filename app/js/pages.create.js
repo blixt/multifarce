@@ -37,7 +37,7 @@ CreateHandler = Application.handler(function () {
                             $('<a/>').frame(data[i].frame_id)));
             }
         });
-        api.getCommands(currentUser.get_id());
+        api.getCommands(null, null, currentUser.get_id());
     }
 
     setPage('Create', page,
