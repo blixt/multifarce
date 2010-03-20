@@ -7,6 +7,7 @@ import hashlib
 from google.appengine.api import users
 from google.appengine.ext import db
 
+from blixt.appengine.cache import memoize
 import blixt.appengine.db
 import multifarce
 from multifarce import model
@@ -15,6 +16,7 @@ from multifarce import model
 FIRST_FRAME_ID = 2
 
 class MultifarceController(object):
+    @memoize
     def clean(self, command):
         """Cleans a single command or a list of commands.
 
@@ -52,6 +54,7 @@ class MultifarceController(object):
 
         return self.get_frame(frame)
 
+    @memoize
     def execute(self, frame, command, flags=None):
         """Executes a command for the specified frame.
 
@@ -86,6 +89,7 @@ class MultifarceController(object):
 
         return result
 
+    @memoize
     def get_command(self, command):
         command = blixt.appengine.db.get_instance(command, model.Command)
 
@@ -102,28 +106,27 @@ class MultifarceController(object):
                   'flags_required': command.flags_required}
         return result
 
+    @memoize
     def get_commands(self, frame=None, leads_to_frame=None, by=None):
-        qry = model.Command.all()
+        commands = model.Command.all()
         if frame:
             frame = blixt.appengine.db.get_id_or_name(frame, model.Frame)
-            qry.filter('frame_id', frame)
+            commands.filter('frame_id', frame)
         if leads_to_frame:
             leads_to_frame = blixt.appengine.db.get_id_or_name(leads_to_frame,
                                                                model.Frame)
-            qry.filter('go_to_frame_id', leads_to_frame)
+            commands.filter('go_to_frame_id', leads_to_frame)
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
-            qry.filter('user_id', by)
+            commands.filter('user_id', by)
 
-        result = []
-        for command in qry:
-            result.append(self.get_command(command))
+        return [self.get_command(command) for command in commands]
 
-        return result
-
+    @memoize
     def get_first_frame(self):
         return self.get_frame(FIRST_FRAME_ID)
 
+    @memoize
     def get_frame(self, frame):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
@@ -135,17 +138,14 @@ class MultifarceController(object):
                   'title': frame.title, 'text': frame.text}
         return result
 
+    @memoize
     def get_frames(self, by=None):
-        qry = model.Frame.all()
+        frames = model.Frame.all()
         if by:
             by = blixt.appengine.db.get_id_or_name(by, model.User)
-            qry.filter('user_id', by)
+            frames.filter('user_id', by)
 
-        result = []
-        for frame in qry:
-            result.append(self.get_frame(frame))
-
-        return result
+        return [self.get_frame(frame) for frame in frames]
 
     def get_status(self, path='/'):
         """Returns the status for the current user, such as e-mail and
@@ -180,17 +180,16 @@ class MultifarceController(object):
 
         return result
 
+    @memoize
     def get_top_commands(self, frame):
         """Returns the most entered commands for the specified frame.
 
         """
-        commands = []
-        for command in model.CommandUsage.get_top(frame):
-            commands.append({'command_id': command.command_id,
-                             'text': command.text,
-                             'count': command.count})
-        return commands
+        return [{'command_id': command.command_id, 'text': command.text,
+                 'count': command.count}
+                for command in model.CommandUsage.get_top(frame)]
 
+    @memoize
     def get_user_info(self, user):
         """Returns information about the specified user. Fails if the user does
         not exist.
