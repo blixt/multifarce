@@ -171,6 +171,15 @@ class Command(db.Model):
                       flags_required=flags_required)
         cmd.put()
 
+        # Update command usage statistics to refer to this command.
+        qry = CommandUsage.all()
+        qry.filter('frame_id', frame)
+        qry.filter('text IN', commands)
+
+        for usage in qry:
+            usage.command_id = cmd.key().id()
+            usage.put()
+
         return cmd
 
     @staticmethod
@@ -184,15 +193,20 @@ class Command(db.Model):
         if not command:
             return None
 
-        CommandUsage.increment(frame, command)
-        return Command.gql('WHERE frame_id = :frame AND synonyms = :synonyms',
-                           frame=frame, synonyms=command).get()
+        instance = Command.gql(
+            'WHERE frame_id = :frame AND synonyms = :synonyms',
+            frame=frame, synonyms=command).get()
+
+        CommandUsage.increment(frame, command, instance)
+
+        return instance
 
 # Class for keeping statistics of command usage. Each counter is specific to a
 # frame and command. The key name has a :0 suffix to support future use of
 # sharding, if the need arises.
 class CommandUsage(db.Model):
     frame_id = db.IntegerProperty(required=True)
+    command_id = db.IntegerProperty()
     text = db.StringProperty(required=True)
     count = db.IntegerProperty(required=True, default=0)
 
@@ -218,14 +232,18 @@ class CommandUsage(db.Model):
         return [cmd for cmd in qry.fetch(limit)]
 
     @staticmethod
-    def increment(frame, text):
+    def increment(frame, text, command=None):
         frame = blixt.appengine.db.get_id_or_name(frame, Frame)
         key_name = CommandUsage.make_key_name(frame, text)
+
+        if command:
+            command = blixt.appengine.db.get_id_or_name(command, Command)
+
         def txn():
             counter = CommandUsage.get_by_key_name(key_name)
             if not counter:
-                counter = CommandUsage(
-                    key_name=key_name, frame_id=frame, text=text)
+                counter = CommandUsage(key_name=key_name, command_id=command,
+                                       frame_id=frame, text=text)
             counter.count += 1
             counter.put()
         db.run_in_transaction(txn)

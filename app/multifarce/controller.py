@@ -186,7 +186,9 @@ class MultifarceController(object):
         """
         commands = []
         for command in model.CommandUsage.get_top(frame):
-            commands.append({'text': command.text, 'count': command.count})
+            commands.append({'command_id': command.command_id,
+                             'text': command.text,
+                             'count': command.count})
         return commands
 
     def get_user_info(self, user):
