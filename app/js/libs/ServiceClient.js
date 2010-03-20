@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
  * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * Service client library (Depends on jQuery, JSON)
  * Handles communication with an API through simple HTTP requests.
  */
@@ -48,14 +48,14 @@ var ServiceClient = (function (jQuery, JSON) {
     },
 
     // Constructor.
-	cls = function (path) {
+    cls = function (path) {
         // Private members.
-		var
-		attempts,
+        var
+        attempts,
         errorHandler = null,
         errorBind = null,
-		queue = [],
-		running = false;
+        queue = [],
+        running = false;
 
         // Getters and setters.
         this.set_errorHandler = function (func, bind) {
@@ -73,7 +73,7 @@ var ServiceClient = (function (jQuery, JSON) {
             errorBind = bind;
         };
 
-		this.get_path = function () { return path; };
+        this.get_path = function () { return path; };
 
         // Public functions accessing private members.
         this.call = function (action, args, onSuccess, bind,
@@ -127,7 +127,7 @@ var ServiceClient = (function (jQuery, JSON) {
                 url: path + action
             });
         };
-	};
+    };
 
-	return cls;
+    return cls;
 })(jQuery, JSON);

@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
  * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * Hash handler
  * Keeps track of the history of changes to the hash part in the address bar.
  */
@@ -11,7 +11,7 @@
  * get messed up.
  *
  * Does not support history in Safari 2 and below.
- * 
+ *
  * Example:
  *     function handler(newHash) {
  *         alert('Hash changed to "' + newHash + '"');

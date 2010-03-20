@@ -18,7 +18,7 @@
  *         if (section) alert('Showing ' + section + ', page ' +
  *                            this.get_param('page', 1));
  *     });
- *     
+ *
  *     var HomeHandler = Application.handler(function () {
  *         alert('Home!');
  *     });

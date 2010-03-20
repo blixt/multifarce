@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
  * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * Simple JSON encoder/decoder
  * Encodes/decodes JavaScript values as JSON (see http://json.org/)
  */

@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
  * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * jQuery hash plugin (Depends on jQuery, Hash)
  * Plugin for detecting changes to the hash and for adding history support for
  * hashes to certain browsers.
@@ -27,7 +27,7 @@
  *     // href attribute to "#def456", unless a second argument with a false
  *     // value is supplied.
  *     $('a#my-anchor').hash('def456');
- * 
+ *
  * WARNING for Internet Explorer 7 and below:
  * If an element on the page has the same ID as the hash used, the history will
  * get messed up.

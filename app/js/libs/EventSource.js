@@ -2,7 +2,7 @@
  * Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
  * This and more JavaScript libraries: http://blixt.org/js
  * MIT License: http://www.opensource.org/licenses/mit-license.php
- * 
+ *
  * Event source "class"
  * Adds event functionality to an object.
  */
@@ -16,7 +16,7 @@
  *     obj.raise('list', 'Hello world!');
  *     // To stop listening to an event:
  *     obj.unlisten('list', handler);
- *     
+ *
  *     // Event functionality can of course be kept in a separate object:
  *     obj.event = new EventSource('list', 'of', 'events');
  *     obj.event.listen('list', handler);
