@@ -3,7 +3,9 @@
 # License: MIT license <http://www.opensource.org/licenses/mit-license.php>
 #
 
-import inspect, re
+import inspect
+import logging
+import re
 from StringIO import StringIO
 
 from django.utils import simplejson
@@ -35,6 +37,9 @@ class JsonService(webapp.RequestHandler):
                 out['status'] = 'success'
                 out['response'] = attr(**args) if callable(attr) else attr
             except Exception, e:
+                logging.exception('JSON service call %s(**%r) failed:' % (
+                    action, args))
+
                 res = {'message': str(e),
                        'module': e.__class__.__module__,
                        'type': e.__class__.__name__}
