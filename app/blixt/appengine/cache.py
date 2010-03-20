@@ -3,6 +3,10 @@
 # License: MIT license <http://www.opensource.org/licenses/mit-license.php>
 #
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 import time
 
 from google.appengine.api import memcache
@@ -24,6 +28,8 @@ class CacheEntry(object):
 
     def current(self):
         if self.time == 0: return True
+        # Assume that times longer than 30 days refer to an absolute point in
+        # time rather than a time span.
         if self.time > 2592000:
             return time.time() < self.time
         else:
@@ -52,3 +58,26 @@ def set(key, value, time=0):
         _cache[key] = CacheEntry(value, time)
 
     memcache.set(key, value, time)
+
+class memoize(object):
+    """Decorator that caches a function's return value each time it is called.
+    If called later with the same arguments, the cached value is returned, and
+    not re-evaluated.
+
+    http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
+
+    """
+    def __init__(self, func):
+       self.func = func
+
+    def __call__(self, *args, **kwargs):
+        key = pickle.dumps((self.func.func_name, args, kwargs))
+        value = get(key, 10)
+        if not value:
+            value = self.func(*args)
+            set(key, value, 10)
+        return value
+
+    def __repr__(self):
+        """Return the function's docstring."""
+        return self.func.__doc__ or ('<function %s>' % self.func.func_name)
