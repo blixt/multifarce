@@ -5,9 +5,9 @@
 <title>multifarce - the text adventure with an infinite number of endings!</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=660, user-scalable=yes" />
-<link href="/media/style.min.css?{{ version }}" rel="stylesheet" type="text/css" />
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js" type="text/javascript"></script>
-<script src="/js/multifarce.min.js?{{ version }}" type="text/javascript"></script>
+<link href="/media/style{% if not debug %}.min{% endif %}.css?{{ version }}" rel="stylesheet" type="text/css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery{% if not debug %}.min{% endif %}.js" type="text/javascript"></script>
+<script src="/js/multifarce{% if not debug %}.min{% endif %}.js?{{ version }}" type="text/javascript"></script>
 </head>
 <body class="dom-loading scheme-3">
 <div id="header">

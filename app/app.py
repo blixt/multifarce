@@ -17,19 +17,21 @@ from google.appengine.ext.webapp import template
 
 import blixt.appengine.cache
 
+import multifarce
 import multifarce.controller
 import multifarce.model
 import multifarce.view
 
-# Uncomment the line below to disable caching.
-blixt.appengine.cache.enabled = False
+# Only cache on live server.
+blixt.appengine.cache.enabled = not multifarce.DEBUG
 
 class HomeHandler(webapp.RequestHandler):
     def get(self):
         html = blixt.appengine.cache.get('app')
         if not html:
             html = template.render(
-                'app.html', {'version': os.environ['CURRENT_VERSION_ID']})
+                'app.html', {'debug': multifarce.DEBUG,
+                             'version': os.environ['CURRENT_VERSION_ID']})
             blixt.appengine.cache.set('app', html, 3600)
         self.response.out.write(html)
 

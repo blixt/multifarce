@@ -2,10 +2,15 @@
 # Copyright (c) 2009 Andreas Blixt <andreas@blixt.org>
 #
 
+import os
+
 __all__ = ['controller', 'model', 'viewer', 'Error', 'CreateCommandError',
            'CreateFrameError', 'InternalError', 'InvalidOperationError',
            'LogInError', 'NotFoundError', 'NotLoggedInError', 'RegisterError',
            'UploadError', 'UsernameError', 'SYNONYMS', 'STOP_WORDS']
+
+# Variable to know whether code is running on a development server.
+DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Development')
 
 # Words that will be merged, to make it easier to "find" a command. The first
 # word will be the one that's really stored in the database and later used for
