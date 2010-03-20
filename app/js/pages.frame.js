@@ -58,14 +58,27 @@ FrameHandler = Application.handler(function (frameId) {
             return;
         }
 
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].command_id) {
+        for (var i = 0, cu; i < data.length; i++) {
+            cu = data[i];
+
+            if (cu.command_id) {
                 commandsTop.append($('<li/>')
                     .append($('<a/>')
-                        .hash('commands/' + data[i].command_id)
-                        .text(data[i].text)));
+                        .hash('commands/' + cu.command_id)
+                        .text(cu.text))
+                    .append($('<span/>')
+                        .text(' (' + cu.count + ' time' +
+                              (cu.count == 1 ? '' : 's') + ')')));
             } else {
-                commandsTop.append($('<li/>').text(data[i].text));
+                commandsTop.append($('<li/>')
+                    .append($('<span/>')
+                        .text(cu.text + ' (' + cu.count + ' time' +
+                              (cu.count == 1 ? '' : 's') + ', '))
+                    .append($('<a/>')
+                        .hash('commands/new?frame=' + frameId + '&command=' +
+                              cu.text.replace(/ /g, '+'))
+                        .text('create it!'))
+                    .append($('<span/>').text(')')));
             }
         }
     });
