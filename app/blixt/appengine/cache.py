@@ -3,11 +3,9 @@
 # License: MIT license <http://www.opensource.org/licenses/mit-license.php>
 #
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 import time
+import types
 
 from google.appengine.api import memcache
 
@@ -59,25 +57,78 @@ def set(key, value, time=0):
 
     memcache.set(key, value, time)
 
-class memoize(object):
+def delete(key):
+    if _cache.has_key(key):
+        del _cache[key]
+
+    memcache.delete(key)
+
+def memoize(ttl_or_function):
     """Decorator that caches a function's return value each time it is called.
     If called later with the same arguments, the cached value is returned, and
     not re-evaluated.
 
     http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
 
+    Modified to work with instance methods. Does not take instance into
+    consideration, so only cache methods that do not change behavior based
+    on instance attributes.
+
     """
-    def __init__(self, func):
-       self.func = func
+    ttl = 30
 
-    def __call__(self, *args, **kwargs):
-        key = pickle.dumps((self.func.func_name, args, kwargs))
-        value = get(key, 10)
-        if not value:
-            value = self.func(*args)
-            set(key, value, 10)
-        return value
+    class memoize_decorator(object):
+        def __init__(self, function):
+            self.__doc__ = function.__doc__
+            self._function = function
+            # The _prefix attribute is a prefix used to uniquely identify the
+            # memoized function. If the function belongs to a class, the class
+            # name will be added to the prefix.
+            self._prefix = self.func_name = function.func_name
 
-    def __repr__(self):
-        """Return the function's docstring."""
-        return self.func.__doc__ or ('<function %s>' % self.func.func_name)
+        def __call__(self, *args, **kwargs):
+            try:
+                # The key differs by function name and arguments.
+                key = pickle.dumps((self._prefix, args, kwargs))
+                value = get(key, ttl)
+            except pickle.PicklingError:
+                key = None
+                value = None
+
+            if value is None:
+                # If the function is bound to a class, make sure to pass the
+                # 'self' argument.
+                if hasattr(self, '_instance'):
+                    value = self._function(self._instance, *args, **kwargs)
+                else:
+                    value = self._function(*args, **kwargs)
+
+                if key:
+                    set(key, value, ttl)
+
+            return value
+
+        def __get__(self, instance, cls):
+            # This code will only run if the function is part of a class
+            # definition.
+            if not hasattr(self, '_instance'):
+                self._instance = instance
+                self._prefix = '%s.%s' % (cls.__name__, self._prefix)
+            return self
+
+        def __repr__(self):
+            return '<memoized function %s>' % self.func_name
+
+        def invalidate(self, *args, **kwargs):
+            """Invalidates the cache for the memoized function with the given
+            arguments.
+
+            """
+            key = pickle.dumps((self._prefix, args, kwargs))
+            delete(key)
+
+    if isinstance(ttl_or_function, types.FunctionType):
+        return memoize_decorator(ttl_or_function)
+
+    ttl = ttl_or_function
+    return memoize_decorator
