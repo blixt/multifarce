@@ -16,7 +16,7 @@ from multifarce import model
 FIRST_FRAME_ID = 2
 
 class MultifarceController(object):
-    @memoize
+    @memoize(0)
     def clean(self, command):
         """Cleans a single command or a list of commands.
 
@@ -35,10 +35,15 @@ class MultifarceController(object):
                 'MUST_BE_LOGGED_IN')
 
         # Create command.
-        cmd = model.Command.create(user, frame, commands, text, go_to_frame,
-                                   flags_on, flags_off, flags_required)
+        command = model.Command.create(user, frame, commands, text, go_to_frame,
+                                       flags_on, flags_off, flags_required)
 
-        return self.get_command(cmd)
+        self.get_commands.invalidate()
+        self.get_commands.invalidate(frame=frame, leads_to_frame=None, by=None)
+        self.get_commands.invalidate(frame=None, leads_to_frame=None,
+                                     by=user.key().id())
+
+        return self.get_command(command)
 
     def create_frame(self, title, text):
         """Creates a new frame.
@@ -52,9 +57,12 @@ class MultifarceController(object):
         # Create frame.
         frame = model.Frame.create(user, title, text)
 
+        self.get_frames.invalidate()
+        self.get_frames.invalidate(user.key().id())
+
         return self.get_frame(frame)
 
-    @memoize
+    @memoize(10)
     def execute(self, frame, command, flags=None):
         """Executes a command for the specified frame.
 
@@ -89,7 +97,7 @@ class MultifarceController(object):
 
         return result
 
-    @memoize
+    @memoize(120)
     def get_command(self, command):
         command = blixt.appengine.db.get_instance(command, model.Command)
 
@@ -106,7 +114,7 @@ class MultifarceController(object):
                   'flags_required': command.flags_required}
         return result
 
-    @memoize
+    @memoize(60)
     def get_commands(self, frame=None, leads_to_frame=None, by=None):
         commands = model.Command.all()
         if frame:
@@ -122,11 +130,11 @@ class MultifarceController(object):
 
         return [self.get_command(command) for command in commands]
 
-    @memoize
+    @memoize(3600)
     def get_first_frame(self):
         return self.get_frame(FIRST_FRAME_ID)
 
-    @memoize
+    @memoize(300)
     def get_frame(self, frame):
         frame = blixt.appengine.db.get_instance(frame, model.Frame)
 
@@ -138,7 +146,7 @@ class MultifarceController(object):
                   'title': frame.title, 'text': frame.text}
         return result
 
-    @memoize
+    @memoize(300)
     def get_frames(self, by=None):
         frames = model.Frame.all()
         if by:
@@ -180,7 +188,7 @@ class MultifarceController(object):
 
         return result
 
-    @memoize
+    @memoize(3600)
     def get_top_commands(self, frame):
         """Returns the most entered commands for the specified frame.
 

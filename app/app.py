@@ -22,7 +22,8 @@ import multifarce.controller
 import multifarce.model
 import multifarce.view
 
-# Only cache on live server.
+# Only cache on live server. Comment the line below to test caching on
+# development server.
 blixt.appengine.cache.enabled = not multifarce.DEBUG
 
 class HomeHandler(webapp.RequestHandler):
