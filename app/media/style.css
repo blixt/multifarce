@@ -343,9 +343,18 @@ input.text
 }
 
 button {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#ddd));
+    border: 1px solid #999;
+    border-radius: 3px;
+    -khtml-border-radius: 3px;
+    -moz-border-radius: 3px;
     float: right;
-    padding: 2px 0;
+    padding: 5px 0;
     width: 160px;
+}
+
+button:active {
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ccc), to(#ddd));
 }
 
 div.info {

@@ -154,8 +154,11 @@ var api = (function () {
             simpleCall('get_status', {path: path});
         },
 
-        getTopCommands: function (frameId) {
-            simpleCall('get_top_commands', {frame: frameId}, 120000);
+        getTopCommands: function (frameId, includeExisting) {
+            simpleCall('get_top_commands', {
+                frame: frameId,
+                include_existing: includeExisting
+            }, 120000);
         },
 
         getUserInfo: function (id) {

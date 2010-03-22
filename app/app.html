@@ -61,7 +61,7 @@
     of commands that have been entered by players, but that do not exist yet.
     </p>
     <ul class="object-list" id="create-command-suggestions">
-      <li>Um yeah... This is going to work soon! Promise!</li>
+      <li>Please stand by...</li>
     </ul>
 
     <h3>Your frames</h3>
@@ -84,12 +84,14 @@
     <div class="text" id="frame-text">
       <p>This is the current frame.</p>
     </div>
-    <h3>Commands leading here</h3>
-    <ul class="object-list" id="frame-commands-in">
+    <h3>Commands on this frame</h3>
+    <p>You can also <a href="#commands/new" id="frame-create-command">create a
+	new one</a>!</p>
+    <ul class="object-list" id="frame-commands-out">
       <li>Please stand by...</li>
     </ul>
-    <h3>Commands on this frame</h3>
-    <ul class="object-list" id="frame-commands-out">
+    <h3>Commands leading here</h3>
+    <ul class="object-list" id="frame-commands-in">
       <li>Please stand by...</li>
     </ul>
     <h3>Most commonly entered commands for this frame</h3>
@@ -206,10 +208,9 @@
         <option>Loading!</option>
       </select>
     </p>
-    <p class="field"><span><a href="#frames/new">Create a new frame!</a> &ndash;
-    <strong>Warning!</strong> Going to the <em>Create frame</em> page will
-    discard your changes on this page! In the future, you'll be able to create
-    a new frame in combination with a new command.</span>
+    <p class="field">
+      <span>This is the frame that the player will be sent to if the command
+	  is executed successfully.</span>
     </p>
     <p class="field"><button id="new-command-go">Create it!</button></p>
   </div>

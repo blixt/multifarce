@@ -5,6 +5,7 @@ var
 page = allPages.filter('#frame-page');
 frameTitle = page.find('#frame-title'),
 frameText = page.find('#frame-text'),
+newCommand = page.find('#frame-create-command'),
 commandsIn = page.find('#frame-commands-in'),
 commandsOut = page.find('#frame-commands-out'),
 commandsTop = page.find('#frame-top-commands'),
@@ -12,9 +13,11 @@ commandsTop = page.find('#frame-top-commands'),
 FrameHandler = Application.handler(function (frameId) {
     frameId = parseInt(frameId, 10);
 
-    commandsIn.empty();
-    commandsOut.empty();
-    commandsTop.empty();
+    commandsIn.html('<li>Please stand by...</li>');
+    commandsOut.html('<li>Please stand by...</li>');
+    commandsTop.html('<li>Please stand by...</li>');
+
+    newCommand.hash('commands/new?frame=' + frameId);
 
     api.success(function (frame) {
         frameTitle.text(frame.title);
@@ -23,6 +26,8 @@ FrameHandler = Application.handler(function (frameId) {
     api.getFrame(frameId);
 
     api.success(function (data) {
+        commandsIn.empty();
+
         if (data.length == 0) {
             commandsIn.append('<li>No commands lead here.</li>');
             return;
@@ -38,6 +43,8 @@ FrameHandler = Application.handler(function (frameId) {
     api.getCommands(null, frameId, null);
 
     api.success(function (data) {
+        commandsOut.empty();
+
         if (data.length == 0) {
             commandsOut.append('<li>This frame has no commands.</li>');
             return;
@@ -53,6 +60,8 @@ FrameHandler = Application.handler(function (frameId) {
     api.getCommands(frameId, null, null);
 
     api.success(function (data) {
+        commandsTop.empty();
+
         if (data.length == 0) {
             commandsTop.append('<li>This frame has no top commands.</li>');
             return;

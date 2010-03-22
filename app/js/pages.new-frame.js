@@ -17,11 +17,13 @@ $('#new-frame-go').live('click', function () {
 });
 
 NewFrameHandler = Application.handler(function () {
+    if (!setPage('Creating new frame', page, 'You will need to log in ' +
+                 'before you can create a frame!', this)) {
+        return;
+    }
+
     title.val('');
     text.val('');
-
-    setPage('Creating new frame', page,
-        'You will need to log in before you can create a frame!', this);
 });
 
 })();

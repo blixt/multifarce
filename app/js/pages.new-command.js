@@ -45,6 +45,11 @@ $('#new-command-clean').live('click', function () {
 });
 
 NewCommandHandler = Application.handler(function () {
+    if (!setPage('Creating new command', page, 'You will need to log in ' +
+                 'before you can create a command!', this)) {
+        return;
+    }
+
     frame.empty();
     goToFrame.empty();
     command1.val(this.get_param('command', ''));
@@ -69,9 +74,6 @@ NewCommandHandler = Application.handler(function () {
 
         frame.val(this.get_param('frame', ''));
     }, this).getFrames();
-
-    setPage('Creating new command', page,
-        'You will need to log in before you can create a command!', this);
 });
 
 })();
