@@ -189,13 +189,19 @@ class MultifarceController(object):
         return result
 
     @memoize(3600)
-    def get_top_commands(self, frame):
-        """Returns the most entered commands for the specified frame.
+    def get_top_commands(self, frame=None, include_existing=True):
+        """Returns the most commonly entered commands. A frame may be specified
+        to only return the most common commands for that frame.
+
+        If the include_existing argument is False, only commands that have not
+        been created will be returned.
 
         """
-        return [{'command_id': command.command_id, 'text': command.text,
+        return [{'frame_id': command.frame_id,
+                 'command_id': command.command_id, 'text': command.text,
                  'count': command.count}
-                for command in model.CommandUsage.get_top(frame)]
+                for command in model.CommandUsage.get_top(frame,
+                                                          include_existing)]
 
     @memoize
     def get_user_info(self, user):

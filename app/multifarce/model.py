@@ -206,7 +206,7 @@ class Command(db.Model):
 # sharding, if the need arises.
 class CommandUsage(db.Model):
     frame_id = db.IntegerProperty(required=True)
-    command_id = db.IntegerProperty()
+    command_id = db.IntegerProperty(default=None)
     text = db.StringProperty(required=True)
     count = db.IntegerProperty(required=True, default=0)
 
@@ -224,12 +224,17 @@ class CommandUsage(db.Model):
         return 0
 
     @staticmethod
-    def get_top(frame, limit=10):
+    def get_top(frame=None, include_existing=True, limit=10):
         # XXX: Needs better handling if shards get implemented.
-        frame = blixt.appengine.db.get_id_or_name(frame, Frame)
-        qry = CommandUsage.all().filter('frame_id', frame).order('-count')
+        commands = CommandUsage.all()
 
-        return [cmd for cmd in qry.fetch(limit)]
+        if frame:
+            frame = blixt.appengine.db.get_id_or_name(frame, Frame)
+            commands.filter('frame_id', frame)
+        if not include_existing:
+            commands.filter('command_id', None)
+
+        return [command for command in commands.order('-count').fetch(limit)]
 
     @staticmethod
     def increment(frame, text, command=None):
