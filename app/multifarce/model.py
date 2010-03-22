@@ -369,52 +369,19 @@ class User(db.Model):
         to the attacker.
 
         """
-        email = email.strip().lower()
-
-        qry = User.all(keys_only=True).filter('email', email)
-        if qry.get():
+        try:
+            email = User.validate_email(email)
+        except multifarce.EmailError, e:
             raise multifarce.RegisterError(
-                'E-mail is already in use.',
-                'EMAIL_IN_USE')
-
-        if not mail.is_email_valid(email):
-            raise multifarce.RegisterError(
-                'A valid e-mail address must be provided.',
-                'INVALID_EMAIL')
+                'Could not use e-mail (%s)' % e,
+                e.code)
 
         try:
-            if len(display_name) < 3:
-                raise multifarce.UsernameError(
-                    'Display name must be at least three characters long.',
-                    'DISPLAY_NAME_TOO_SHORT')
-            if len(display_name) > 20:
-                raise multifarce.UsernameError(
-                    'Display name must not be any longer than 20 characters.',
-                    'DISPLAY_NAME_TOO_LONG')
-
-            if not re.match('^[A-Z0-9a-z]([-._~\'" ]*[A-Z0-9a-z-~!"]+)*$',
-                            display_name):
-                raise multifarce.UsernameError(
-                    'Display name should consist of letters and/or digits, '
-                    'optionally with dashes, periods, underscores, tildes, '
-                    'apostrophes, quotes or spaces inbetween.',
-                    'DISPLAY_NAME_INVALID_CHARACTERS')
-
-            # XXX: Case sensitive
-            qry = User.all(keys_only=True).filter('display_name', display_name)
-            if qry.get():
-                raise multifarce.UsernameError(
-                    'Display name is already in use.',
-                    'DISPLAY_NAME_IN_USE')
-        except multifarce.UsernameError, e:
+            display_name = User.validate_display_name(display_name)
+        except multifarce.NameError, e:
             raise multifarce.RegisterError(
                 'Could not use display name (%s)' % e,
                 e.code)
-
-        if User.all(keys_only=True).filter('email', email).get():
-            raise multifarce.RegisterError(
-                'E-mail address is already in use.',
-                'EMAIL_IN_USE')
 
         if password is None:
             google_user = users.get_current_user()
@@ -444,6 +411,63 @@ class User(db.Model):
 
         user.put()
         return user
+
+    @staticmethod
+    def validate_display_name(display_name):
+        if not isinstance(display_name, basestring):
+            raise multifarce.NameError(
+                'The display name must be supplied as a string.',
+                'DISPLAY_NAME_MUST_BE_STRING')
+
+        display_name = display_name.strip()
+
+        if len(display_name) < 3:
+            raise multifarce.NameError(
+                'Display name must be at least three characters long.',
+                'DISPLAY_NAME_TOO_SHORT')
+        if len(display_name) > 20:
+            raise multifarce.NameError(
+                'Display name must not be any longer than 20 characters.',
+                'DISPLAY_NAME_TOO_LONG')
+
+        if not re.match('^[A-Z0-9a-z]([-._~\'" ]*[A-Z0-9a-z-~!"]+)*$',
+                        display_name):
+            raise multifarce.NameError(
+                'Display name should consist of letters and/or digits, '
+                'optionally with dashes, periods, underscores, tildes, '
+                'apostrophes, quotes or spaces inbetween.',
+                'DISPLAY_NAME_INVALID_CHARACTERS')
+
+        # XXX: Case sensitive
+        qry = User.all(keys_only=True).filter('display_name', display_name)
+        if qry.get():
+            raise multifarce.NameError(
+                'Display name is already in use.',
+                'DISPLAY_NAME_IN_USE')
+
+        return display_name
+
+    @staticmethod
+    def validate_email(email):
+        if not isinstance(email, basestring):
+            raise multifarce.EmailError(
+                'The e-mail address must be supplied as a string.',
+                'EMAIL_MUST_BE_STRING')
+
+        email = email.strip().lower()
+
+        qry = User.all(keys_only=True).filter('email', email)
+        if qry.get():
+            raise multifarce.EmailError(
+                'E-mail is already in use.',
+                'EMAIL_IN_USE')
+
+        if not mail.is_email_valid(email):
+            raise multifarce.EmailError(
+                'A valid e-mail address must be provided.',
+                'INVALID_EMAIL')
+
+        return email
 
     def end_session(self, handler):
         """Removes a session from the database and the client, effectively
@@ -478,3 +502,15 @@ class User(db.Model):
         # Send cookie to browser.
         handler.response.headers['Set-Cookie'] = cookie
         handler.request.cookies['session'] = self.session
+
+    def update_profile(self, new_email=None, new_display_name=None):
+        """Updates the user's e-mail address and/or display name.
+
+        """
+        if new_email and new_email != self.email:
+            new_email = User.validate_email(new_email)
+            self.email = new_email
+        if new_display_name and new_display_name != self.display_name:
+            new_display_name = User.validate_display_name(new_display_name)
+            self.display_name = new_display_name
+        self.put()

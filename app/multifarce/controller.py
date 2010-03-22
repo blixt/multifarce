@@ -248,3 +248,15 @@ class MultifarceController(object):
 
         """
         model.User.register(email, display_name, password)
+
+    def update_profile(self, new_email=None, new_display_name=None):
+        """Updates the current user with new e-mail and display name values.
+
+        """
+        user = model.User.get_current(self)
+        if not user:
+            raise multifarce.NotLoggedInError(
+            'You must be logged in to update your profile.',
+            'MUST_BE_LOGGED_IN')
+        user.update_profile(new_email, new_display_name)
+        return self.get_status()

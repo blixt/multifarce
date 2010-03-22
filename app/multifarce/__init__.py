@@ -5,9 +5,10 @@
 import os
 
 __all__ = ['controller', 'model', 'viewer', 'Error', 'CreateCommandError',
-           'CreateFrameError', 'InternalError', 'InvalidOperationError',
-           'LogInError', 'NotFoundError', 'NotLoggedInError', 'RegisterError',
-           'UploadError', 'UsernameError', 'SYNONYMS', 'STOP_WORDS']
+           'CreateFrameError', 'EmailError', 'InternalError',
+           'InvalidOperationError', 'LogInError', 'NameError', 'NotFoundError',
+           'NotLoggedInError', 'RegisterError', 'UploadError', 'SYNONYMS',
+           'STOP_WORDS']
 
 # Variable to know whether code is running on a development server.
 DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Development')
@@ -48,6 +49,10 @@ class CreateFrameError(Error):
     """Raised when creating a frame fails."""
     pass
 
+class EmailError(Error):
+    """Raised when an invalid e-mail is used."""
+    pass
+
 class ExecuteError(Error):
     """Raised when the execution of a command fails."""
     pass
@@ -76,6 +81,10 @@ class LogInError(Error):
     """Raised when a login attempt fails."""
     pass
 
+class NameError(Error):
+    """Raised when an invalid name is used."""
+    pass
+
 class NotFoundError(Error):
     """Raised when an item could not be found."""
     pass
@@ -93,8 +102,4 @@ class RegisterError(Error):
 
 class UploadError(Error):
     """Raised when an upload fails."""
-    pass
-
-class UsernameError(Error):
-    """Raised when an invalid username is used."""
     pass
