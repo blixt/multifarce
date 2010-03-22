@@ -131,8 +131,6 @@ HomeHandler = Application.handler(function () {
     // Handle state.
     if (state) {
         game.set_state(state);
-    } else if (curFrameId > 0) {
-        $.hash.go('?state=' + game.get_state());
     }
 
     setPage(game.get_frameTitle() || 'Hello World!', page);
