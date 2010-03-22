@@ -8,6 +8,7 @@ var site = new Application([
     ['^frames/new$', NewFrameHandler],
     ['^log-in$', LogInHandler],
     ['^log-out$', LogOutHandler],
+    ['^profile$', ProfileHandler],
     ['^register$', RegisterHandler],
     //['^user/([^/]+)$', UserHandler],
     ['^.*$', NotFoundHandler]
