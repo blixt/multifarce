@@ -56,7 +56,7 @@ getPage, setPage, notify;
     };
 
     // Helper function for setting which page to show.
-    setPage = function (title, which, requireLogin, handler) {
+    setPage = function (title, which, requireLogin, handler, retries) {
         var loggedIn = currentUser.loggedIn();
         if (requireLogin && !loggedIn) {
             if (loggedIn === false) {
@@ -67,14 +67,17 @@ getPage, setPage, notify;
                 $.hash.go('log-in?continue=' + Application.encode(
                     handler.get_requestPath()).replace(/ /g, '+'));
             } else {
-                // Login info has not been retrieved yet; delay the function for
-                // a while.
+                // Login info has not been retrieved yet; delay the function
+                // for a while.
                 setTimeout(function () {
-                    setPage(title, which, requireLogin, handler);
+                    setPage(title, which, requireLogin, handler,
+                            (retries || 0) + 1);
                 }, 50);
             }
 
-            return;
+            return false;
+        } else if (requireLogin && retries) {
+            handler.run.apply(handler, handler.get_matches());
         }
 
         if (title) {
@@ -82,10 +85,12 @@ getPage, setPage, notify;
             document.title = title + ' - ' + APP_TITLE;
         }
 
-        if (!which || shown[0] == which[0]) return;
+        if (which && shown[0] != which[0]) {
+            shown.replaceWith(which);
+            shown = which;
+        }
 
-        shown.replaceWith(which);
-        shown = which;
+        return true;
     };
 
     // Helper function for showing a notification.
