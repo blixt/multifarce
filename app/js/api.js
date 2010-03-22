@@ -181,6 +181,13 @@ var api = (function () {
             });
         },
 
+        updateProfile: function (email, displayName) {
+            simpleCall('update_profile', {
+                new_email: email,
+                new_display_name: displayName
+            });
+        },
+
         // More simpleCall functionality.
         error: function (setOnError, setOnErrorBind) {
             onError = setOnError;
