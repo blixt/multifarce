@@ -25,20 +25,29 @@ $.fn.frame = function (id) {
 };
 
 $.fn.user = function (id) {
-    var user = User.get(id), img, span;
+    this.addClass('user').hash('user/' + id).empty();
 
-    this.addClass('user').hash('user/' + id)
-        .empty()
-        .append(img = $('<img/>').attr({alt: '', src: '/media/loading3.gif',
-                                        width: 20, height: 20}))
-        .append(span = $('<span/>').text('[User#' + id + ']'));
-
-    user.listen('load', function () {
+    var
+    user = User.get(id),
+    img = $('<img/>').attr({alt: '', width: 20, height: 20}).appendTo(this),
+    span = $('<span/>').appendTo(this),
+    onload = function () {
         img.attr('src', user.get_gravatarUrl(20));
         span.text(user.get_displayName());
-    });
+    };
 
-    user.load();
+    // Update the user info whenever a load event is raised.
+    user.listen('load', onload);
+
+    if (user.isLoaded()) {
+        // Simulate a load event to load the user data into the link.
+        onload();
+    } else {
+        img.attr('src', '/media/loading3.gif');
+        span.text('[User#' + id + ']');
+
+        user.load();
+    }
 };
 
 var
