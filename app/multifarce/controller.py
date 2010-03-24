@@ -216,7 +216,7 @@ class MultifarceController(object):
 
         result = {'user_id': user.key().id(),
                   'display_name': user.display_name,
-                  'email_md5': md5.new(user.email.lower()).hexdigest()}
+                  'email_md5': hashlib.md5(user.email).hexdigest()}
         return result
 
     def log_in(self, email, password):
