@@ -26,6 +26,11 @@ var User = (function () {
         // Getters/setters.
         this.get_displayName = function () { return data.display_name; };
         this.get_emailHash = function () { return data.email_md5; };
+        this.get_gravatarUrl = function (size) {
+            return GRAVATAR
+                .replace(/\{md5\}/, this.isLoaded() ? this.get_emailHash() : '')
+                .replace(/\{size\}/, size || '32');
+        };
         this.get_id = function () { return data.user_id; };
         this.isCurrent = function () { return this == currentUser; };
         this.isLoaded = function () { return loaded; };
@@ -76,11 +81,10 @@ var User = (function () {
         if (typeof id != 'number')
             throw 'Invalid type (id); expected number.';
 
-        if (id in cache) {
-            return cache[id];
-        } else {
+        if (!(id in cache)) {
             cache[id] = new cls(id);
         }
+        return cache[id];
     };
 
     cls.logIn = function (email, password, success, error) {

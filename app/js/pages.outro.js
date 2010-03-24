@@ -36,18 +36,15 @@ var showHide = function (show, hide) {
 };
 
 currentUser.listen('load', function () {
+    avatar.attr('src', this.get_gravatarUrl(28));
     if (this.loggedIn()) {
         username.empty().append(
             $('<a/>').hash('profile').text(this.get_displayName()));
 
-        avatar.attr('src', 'http://www.gravatar.com/avatar/' +
-            this.get_emailHash() + '?s=28&d=identicon&r=PG');
         action1.text('Create').hash('create');
         action2.text('Log out').hash('log-out');
     } else {
         username.text('Not logged in');
-        avatar.attr('src', 'http://www.gravatar.com/avatar/' +
-                           '?s=28&d=identicon&r=PG');
         action1.text('Register').hash('register');
         action2.text('Log in').hash('log-in');
     }
