@@ -1,9 +1,9 @@
 $(function () {
 
-// Add functionality to jQuery for easily linking to a frame/command that hasn't
-// been loaded yet.
+// Add functionality to jQuery for easily linking to a frame, command or user
+// that hasn't been loaded yet.
 $.fn.command = function (id) {
-    var $this = this;
+    var $this = this.addClass('command');
 
     $this.hash('commands/' + id).text('[Command#' + id + ']');
     api.success(function (command) {
@@ -14,7 +14,7 @@ $.fn.command = function (id) {
 };
 
 $.fn.frame = function (id) {
-    var $this = this;
+    var $this = this.addClass('frame');
 
     $this.hash('frames/' + id).text('[Frame#' + id + ']');
     api.success(function (frame) {
@@ -22,6 +22,23 @@ $.fn.frame = function (id) {
     }).getFrame(id);
 
     return $this;
+};
+
+$.fn.user = function (id) {
+    var user = User.get(id), img, span;
+
+    this.addClass('user').hash('user/' + id)
+        .empty()
+        .append(img = $('<img/>').attr({alt: '', src: '/media/loading3.gif',
+                                        width: 20, height: 20}))
+        .append(span = $('<span/>').text('[User#' + id + ']'));
+
+    user.listen('load', function () {
+        img.attr('src', user.get_gravatarUrl(20));
+        span.text(user.get_displayName());
+    });
+
+    user.load();
 };
 
 var

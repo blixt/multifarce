@@ -260,6 +260,36 @@ textarea
     padding: 0;
 }
 
+a.user {
+    background: #27b;
+    border-radius: 2px;
+    -khtml-border-radius: 2px;
+    -moz-border-radius: 2px;
+    box-shadow: 0 0 2px #444;
+    -khtml-box-shadow: 0 0 2px #444;
+    -moz-box-shadow: 0 0 2px #444;
+    color: #fff;
+    display: inline-block;
+    line-height: 20px;
+    padding: 2px 5px 2px 2px;
+    text-decoration: none;
+    text-shadow: 0 1px 0 #246;
+    -khtml-text-shadow: 0 1px 0 #246;
+    -moz-text-shadow: 0 1px 0 #246;
+}
+
+a.user img {
+    border-radius: 2px;
+    -khtml-border-radius: 2px;
+    -moz-border-radius: 2px;
+    float: left;
+}
+
+a.user span {
+    display: inline-block;
+    margin-left: 3px;
+}
+
 body, html {
     background: #358;
 }
@@ -415,6 +445,11 @@ ol.object-list, ul.object-list {
 
 p {
     margin: 0 10px 1em;
+}
+
+p.author {
+    color: #555;
+    text-indent: 2px;
 }
 
 p.field.disabled label {

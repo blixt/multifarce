@@ -4,6 +4,7 @@ var FrameHandler;
 var
 page = allPages.filter('#frame-page');
 frameTitle = page.find('#frame-title'),
+frameAuthor = page.find('#frame-author'),
 frameText = page.find('#frame-text'),
 newCommand = page.find('#frame-create-command'),
 commandsIn = page.find('#frame-commands-in'),
@@ -21,6 +22,7 @@ FrameHandler = Application.handler(function (frameId) {
 
     api.success(function (frame) {
         frameTitle.text(frame.title);
+        frameAuthor.user(frame.author);
         frameText.formattedText(frame.text);
     });
     api.getFrame(frameId);
