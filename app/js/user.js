@@ -21,6 +21,14 @@ var User = (function () {
             data = user;
             loaded = true;
             this.raise('load');
+
+            // Check if this is the current user instance. There will also be
+            // another cached instance of this user with an id.
+            if (this.isCurrent()) {
+                // Make sure that the id-bound user instance of the current
+                // user is up-to-date.
+                cls.get(this.get_id()).load(data);
+            }
         };
 
         // Getters/setters.
