@@ -2,10 +2,10 @@ var CreateHandler;
 (function () {
 
 var
-page = allPages.filter('#create-page');
+page = allPages.filter('#create-page'),
 commandSuggestions = page.find('#create-command-suggestions'),
 frames = page.find('#create-frames'),
-commands = page.find('#create-commands'),
+commands = page.find('#create-commands');
 
 CreateHandler = Application.handler(function () {
     if (!setPage('Create', page, 'You need to log in before you can create ' +

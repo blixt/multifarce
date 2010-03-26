@@ -2,14 +2,14 @@ var FrameHandler;
 (function () {
 
 var
-page = allPages.filter('#frame-page');
+page = allPages.filter('#frame-page'),
 frameTitle = page.find('#frame-title'),
 frameAuthor = page.find('#frame-author'),
 frameText = page.find('#frame-text'),
 newCommand = page.find('#frame-create-command'),
 commandsIn = page.find('#frame-commands-in'),
 commandsOut = page.find('#frame-commands-out'),
-commandsTop = page.find('#frame-top-commands'),
+commandsTop = page.find('#frame-top-commands');
 
 FrameHandler = Application.handler(function (frameId) {
     frameId = parseInt(frameId, 10);

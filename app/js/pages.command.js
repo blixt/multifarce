@@ -2,13 +2,13 @@ var CommandHandler;
 (function () {
 
 var
-page = allPages.filter('#command-page');
+page = allPages.filter('#command-page'),
 title = page.find('#command-title'),
 author = page.find('#command-author'),
 frameLink = page.find('#command-frame a'),
 text = page.find('#command-text'),
 leadsTo = page.find('#command-leads-to'),
-leadsToLink = leadsTo.children('a'),
+leadsToLink = leadsTo.children('a');
 
 CommandHandler = Application.handler(function (commandId) {
     commandId = parseInt(commandId, 10);
