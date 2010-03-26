@@ -1,5 +1,17 @@
 # multifarce
 
+## Running the code locally
+
+First of all, you will need to have the [Google App Engine SDK](http://code.google.com/appengine/) installed.
+
+To build all JavaScript files into one file (and compress it), you will need to run the `prepare.py` script. On a UNIX system, you would run it like this:
+
+    $ ./prepare.py
+
+The `prepare.py` script must be run whenever the JavaScript code has changed.
+
+After this, you need to start the Google App Engine development server and browse to <http://localhost/admin/setup>. This is a script that will generate a default user and the initial frame. It requires admin privileges, so check the "Sign in as Administrator" box.
+
 ## Information
 
 multifarce is a simple text adventure game where the idea is that the users contribute to the game. The user begins on a "frame" and has the ability to enter any "command". If the "command" does not exist, the user may create it. The user can then specify what "frame" the command should lead to.
