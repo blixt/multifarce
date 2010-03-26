@@ -25,7 +25,7 @@ $.fn.frame = function (id) {
 };
 
 $.fn.user = function (id) {
-    this.addClass('user').hash('user/' + id).empty();
+    this.addClass('user').hash('users/' + id).empty();
 
     var
     user = User.get(id),

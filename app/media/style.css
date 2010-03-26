@@ -248,6 +248,19 @@ textarea
     width: 500px;
 }
 
+#user-page #user-image {
+    border-radius: 3px;
+    -khtml-border-radius: 3px;
+    -moz-border-radius: 3px;
+    box-shadow: 0 0 3px #aaa;
+    -khtml-box-shadow: 0 0 3px #aaa;
+    -moz-box-shadow: 0 0 3px #aaa;
+    float: right;
+    height: 150px;
+    padding: 3px;
+    width: 150px;
+}
+
 #username {
     float: right;
     font-size: 18px;

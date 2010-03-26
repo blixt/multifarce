@@ -10,7 +10,7 @@ var site = new Application([
     ['^log-out$', LogOutHandler],
     ['^profile$', ProfileHandler],
     ['^register$', RegisterHandler],
-    //['^user/([^/]+)$', UserHandler],
+    ['^users/(\\d+)$', UserHandler],
     ['^.*$', NotFoundHandler]
 ]);
 

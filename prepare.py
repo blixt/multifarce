@@ -31,6 +31,7 @@ SCRIPTS = [
     'app/js/pages.not-found.js',
     'app/js/pages.profile.js',
     'app/js/pages.register.js',
+    'app/js/pages.user.js',
     'app/js/pages.outro.js',
     'app/js/outro.js',
     ]
