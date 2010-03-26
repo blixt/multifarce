@@ -14,7 +14,7 @@ log = page.find('#log'),
 
 // Helper function for executing a command.
 execute = function () {
-    var command = action.val().toLowerCase();
+    var command = action.val().toLowerCase(), frameId;
     if (!command) return;
 
     action.val('');
@@ -25,6 +25,9 @@ execute = function () {
         log.prepend(
             $('<div class="result"/>').text('Starting...'));
         game.start();
+    } else if ((command == '/edit' || command == '/view') &&
+               (frameId = game.get_frameId())) {
+        $.hash.go('frames/' + frameId);
     } else {
         game.execute(command);
     }
