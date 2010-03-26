@@ -1,7 +1,7 @@
 // Create application for handling the site.
 var site = new Application([
     ['^$', HomeHandler],
-    //['^commands/(\d+)$', CommandHandler],
+    ['^commands/(\\d+)$', CommandHandler],
     ['^commands/new$', NewCommandHandler],
     ['^create$', CreateHandler],
     ['^frames/(\\d+)$', FrameHandler],
