@@ -249,12 +249,13 @@ textarea
 }
 
 #user-page #user-image {
+    border: #ccc solid 1px;
     border-radius: 3px;
     -khtml-border-radius: 3px;
     -moz-border-radius: 3px;
-    box-shadow: 0 0 3px #aaa;
-    -khtml-box-shadow: 0 0 3px #aaa;
-    -moz-box-shadow: 0 0 3px #aaa;
+    box-shadow: 0 0 2px #aaa;
+    -khtml-box-shadow: 0 0 2px #aaa;
+    -moz-box-shadow: 0 0 2px #aaa;
     float: right;
     height: 150px;
     padding: 3px;

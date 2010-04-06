@@ -17,7 +17,7 @@ var ServiceClient = (function (jQuery, JSON) {
         } else {
             var response = {
                 message: 'The request failed after ' + state.attempts +
-                         ' attempts.',
+                         ' attempts. Please try again.',
                 type: 'JavaScriptError'};
             if (state.onError)
                 state.onError.call(state.bindError || state.bind, response);
